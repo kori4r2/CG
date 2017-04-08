@@ -119,8 +119,10 @@
   <ItemGroup>
     <ClCompile Include="myShaders.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Polygon.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Polygon.hpp" />
     <ClInclude Include="myShaders.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

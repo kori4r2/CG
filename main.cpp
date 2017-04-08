@@ -1,7 +1,11 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "myShaders.hpp"
+#include "Polygon.hpp"
 #include <iostream>
 
 void key_callback(GLFWwindow*, int, int, int, int);
@@ -10,6 +14,7 @@ GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int he
 
 int main() {
 
+	// Creates the window
 	GLFWwindow *window = initWindow(3, 3, 800, 600, "janela");
 	if (!window)
 		return -1;
@@ -48,60 +53,14 @@ int main() {
 	glDeleteShader(blueFShader);
 	glDeleteShader(redFShader);
 
-//---------------------------------------------------------------------------------------------------------
+	// Create polygons to be drawn on screen (best way would be to save inside an array)
+	Polygon *triangle = new Polygon(200, 150, 100, 3, window);
+	Polygon *square = new Polygon(600, 450, 100, 4, window);
 
-	// The vertices of the object
-	GLfloat vertices[] = {
-		1.0f, 0.5f, 0.0f,
-		1.0f, -0.5f, 0.0f,
-		0.0f, -0.5f, 0.0f,
-		-1.0f, -0.5f, 0.0f,
-		-1.0f, 0.5f, 1.0f
-	};
-
-	GLuint indices[] = {
-		0, 1, 2,
-		2, 3, 4
-	};
+	// Set speed and behaviours
+	// To do
 
 //---------------------------------------------------------------------------------------------------------
-
-	//GLuint EBO;
-	//glGenBuffers(1, &EBO);
-
-	// This is an array of Vertex Buffer objects
-	GLuint VBOs[2];
-	glGenBuffers(2, VBOs);
-
-	// Create and bind the array of Vertex Array Objects
-	GLuint VAOs[2];
-	glGenVertexArrays(2, VAOs);
-
-	// The first array positions will get the pixels of the red triangle
-	glBindVertexArray(VAOs[0]);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	// This is not used here
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	// The first buffer gets the first 3 vertices saved in the vertices array
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glBindVertexArray(0);
-
-	// The second array position will get the pixels of the blue triangle
-	glBindVertexArray(VAOs[1]);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	// The second buffer skips the first two pixels saved in the vertices array (tightly packed) and gets the last 3
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)(6 * (sizeof(GLfloat)) ) );
-	glEnableVertexAttribArray(0);
-	glBindVertexArray(0);
-
-//---------------------------------------------------------------------------------------------------------
-
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
 		// Checks if events were triggered
@@ -110,26 +69,37 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		// Clear color buffer
 		glClear(GL_COLOR_BUFFER_BIT);
-		// Draw the red triangle
-		glUseProgram(redShaderProgram);
-		glBindVertexArray(VAOs[0]);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+
 		// Draw the blue triangle
 		glUseProgram(blueShaderProgram);
-		glBindVertexArray(VAOs[1]);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		// Unbinds the vertex array
-		glBindVertexArray(0);
+
+		// triangle->Update();
+		glm::mat4 moveTransform;
+		GLfloat currentTime = glfwGetTime();
+		moveTransform = glm::translate(moveTransform, glm::vec3( currentTime * 1.0f, 0.0f, 0.0f));
+		//moveTransform = glm::rotate(moveTransform, currentTime * 50.0f, glm::vec3(0.0f, 0.0f, 0.1f));
+		GLuint transformLoc2 = glGetUniformLocation(blueShaderProgram, "transform");
+		glUniformMatrix4fv(transformLoc2, 1, GL_FALSE, glm::value_ptr(moveTransform));
+
+		triangle->Draw();
+
+		// Draw the red triangle
+		glUseProgram(redShaderProgram);
+
+		// square->Update()
+		glm::mat4 idMatrix;
+		GLuint transformLoc = glGetUniformLocation(redShaderProgram, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(idMatrix));
+
+		square->Draw();
+
 		// Swaps the back buffer to front buffer, displaying in the output
 		glfwSwapBuffers(window);
 	}
 
 //-----------------------------------------------------------------------------------------------------
-
-	glDeleteVertexArrays(2, VAOs);
-	glDeleteBuffers(2, VBOs);
-	// EBO was not used
-	//glDeleteBuffers(1, &EBO);
+	delete(triangle);
+	delete(square);
 
 	glfwTerminate();
 	return 0;

@@ -3,8 +3,9 @@
 // Vertex shader code
 const GLchar* simpleVShaderSource = "#version 330 core\n"
 "layout(location = 0) in vec3 position;\n"
+"uniform mat4 transform;"
 "void main() {\n"
-"	gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
+"	gl_Position = (transform * vec4(position.x, position.y, position.z, 1.0f));\n"
 "}\0";
 
 // Fragment shader code
@@ -19,6 +20,7 @@ const GLchar* blueFShaderSource = "#version 330 core\n"
 // This fragment shader paints the pixels red
 const GLchar* redFShaderSource = "#version 330 core\n"
 "out vec4 color;\n"
+
 "void main()\n"
 "{\n"
 "color = vec4(1.0, 0.0, 0.0, 1.0);\n"
