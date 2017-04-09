@@ -53,12 +53,16 @@ int main() {
 	glDeleteShader(blueFShader);
 	glDeleteShader(redFShader);
 
-	// Create polygons to be drawn on screen (best way would be to save inside an array)
+	// Create polygons to be drawn on screen (best way would be to save inside a Polygon[] variable)
 	Polygon *triangle = new Polygon(200, 150, 100, 3, window);
+	// Associates the object with a shader program
+	triangle->setShaderProgram(&blueShaderProgram);
 	Polygon *square = new Polygon(600, 450, 100, 4, window);
+	square->setShaderProgram(&redShaderProgram);
 
 	// Set speed and behaviours
-	// To do
+	square->setSpeed(glm::vec3(1.0f, 0.0f, 0.0f), 0.5);
+	triangle->setSpeed(glm::vec3(-0.5f, 0.5f, 0.0f), 0.5f);
 
 //---------------------------------------------------------------------------------------------------------
 	// Game loop
@@ -70,27 +74,12 @@ int main() {
 		// Clear color buffer
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// Draw the blue triangle
-		glUseProgram(blueShaderProgram);
-
-		// triangle->Update();
-		glm::mat4 moveTransform;
-		GLfloat currentTime = glfwGetTime();
-		moveTransform = glm::translate(moveTransform, glm::vec3( currentTime * 1.0f, 0.0f, 0.0f));
-		//moveTransform = glm::rotate(moveTransform, currentTime * 50.0f, glm::vec3(0.0f, 0.0f, 0.1f));
-		GLuint transformLoc2 = glGetUniformLocation(blueShaderProgram, "transform");
-		glUniformMatrix4fv(transformLoc2, 1, GL_FALSE, glm::value_ptr(moveTransform));
-
+		// Calls update and draw from the triangle object
+		triangle->Update();
 		triangle->Draw();
 
-		// Draw the red triangle
-		glUseProgram(redShaderProgram);
-
-		// square->Update()
-		glm::mat4 idMatrix;
-		GLuint transformLoc = glGetUniformLocation(redShaderProgram, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(idMatrix));
-
+		// Calls update and draw from the square object
+		square->Update();
 		square->Draw();
 
 		// Swaps the back buffer to front buffer, displaying in the output

@@ -11,18 +11,33 @@
 
 class Polygon {
 private:
-	float _x, _y, _radius;
+	// _x and _y save the initial object position (using custom window coordinates)
+	// _radius is the polygon radius (also using the custom coordinates)
+	// _startTime is the time when the movement started, everytime setSpeed is called or the object
+	// goes out of the screen, it should be reset with _startTime = glfwGetTime() to make object come back
+	// to the starting position
+	float _x, _y, _radius, _startTime;
 	int _sides;
 	GLfloat *_vertices;
 	GLuint *_indices;
 	GLuint _VAO, _VBO, _EBO;
 	glm::vec3 _speed;
+	GLuint *_shaderProgram;
 
+	// Generates vertices and indices based on the polygon characteristics
 	void generateVertices(GLFWwindow*);
 
 public:
+	//	Creates a new polygon object. These x and y variables consider the bottom left corner of the
+	// window as the point of origin and window width and height as maximum values
 	Polygon(float x, float y, float radius, int sides, GLFWwindow *window);
+	// Some getters and setters
+	float x();
+	float y();
+	//	It's recomended that the direction value is normalized, but it's not a requirement
 	void setSpeed(glm::vec3 direction, float value);
+	void setShaderProgram(GLuint *shaderProgram);
+	// Update and draw
 	void Update();
 	void Draw();
 	~Polygon();

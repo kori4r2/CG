@@ -88,6 +88,7 @@ GLuint CreateRedFShader(GLint *success) {
 
 GLuint CreateSingleColorFShader(float Rvalue, float Gvalue, float Bvalue, float Avalue, GLint *success) {
 
+	// Generates code according to RGBA code passed
 	std::string mycode = "#version 330 core\nout vec4 color;\nvoid main()\n{\ncolor = vec4("
 		+ std::to_string(Rvalue) + ", " + std::to_string(Gvalue) + ", " + std::to_string(Bvalue) + ", " + std::to_string(Avalue) +
 		");\n}\n\0";
@@ -113,11 +114,12 @@ GLuint CreateSingleColorFShader(float Rvalue, float Gvalue, float Bvalue, float 
 
 GLuint LinkShaderProgram(GLuint vertexShader, GLuint fragmentShader, GLint *success) {
 
-	// Creates shader program for red color
+	// Creates shader program
 	GLuint shaderProgram;
 	GLchar infolog[512];
 	shaderProgram = glCreateProgram();
 
+	// Links the shaders
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
 	glLinkProgram(shaderProgram);
