@@ -16,12 +16,12 @@ private:
 	// _startTime is the time when the movement started, everytime setSpeed is called or the object
 	// goes out of the screen, it should be reset with _startTime = glfwGetTime() to make object come back
 	// to the starting position
-	float _x, _y, _radius, _startTime;
-	int _sides;
+	float _x, _y, _radius, _startTime, _curX, _curY, _speedValue;
+	int _sides, _width, _height;
 	GLfloat *_vertices;
 	GLuint *_indices;
 	GLuint _VAO, _VBO, _EBO;
-	glm::vec3 _speed;
+	glm::vec3 _speedDirection;
 	GLuint *_shaderProgram;
 
 	// Generates vertices and indices based on the polygon characteristics
