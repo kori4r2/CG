@@ -10,7 +10,12 @@
 
 void key_callback(GLFWwindow*, int, int, int, int);
 
+void mouse_button_callback(GLFWwindow*, int, int, int);
+
 GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int height, const char *title);
+
+bool movFlag = false;
+double movX, movY;
 
 int main() {
 
@@ -38,6 +43,11 @@ int main() {
 	if (!success)
 		return -1;
 
+	/*/ Create and compile red fragment shader from code
+	GLuint greenFShader = CreateSingleColorFShader(1.0f, 0.0f, 0.0f, 1.0f, &success);
+	if (!success)
+		return -1;*/
+
 	// Creates shader program for blue color, attaches shaders and links the program
 	GLuint blueShaderProgram = LinkShaderProgram(vertexShader, blueFShader, &success);
 	if (!success)
@@ -48,10 +58,16 @@ int main() {
 	if (!success)
 		return -1;
 
+	/*/ Creates shader program for green color
+	GLuint greenShaderProgram = LinkShaderProgram(vertexShader, greenFShader, &success);
+	if (!success)
+		return -1;*/
+
 	// The shaders are no longer needed
 	glDeleteShader(vertexShader);
 	glDeleteShader(blueFShader);
 	glDeleteShader(redFShader);
+	//glDeleteShader(greenFShader);
 
 	// Create polygons to be drawn on screen (best way would be to save inside a Polygon[] variable)
 	Polygon *triangle = new Polygon(200, 150, 100, 3, window);
@@ -59,14 +75,26 @@ int main() {
 	triangle->setShaderProgram(&blueShaderProgram);
 	Polygon *square = new Polygon(600, 450, 100, 4, window);
 	square->setShaderProgram(&redShaderProgram);
+	//Polygon *pentagon = new Polygon(350, 350, 100, 4, window);
+	//square->setShaderProgram(&greenShaderProgram);
 
 	// Set speed and behaviours
-	square->setSpeed(glm::vec3(1.0f, 0.0f, 0.0f), 0.5);
+	square->setSpeed(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f);
 	triangle->setSpeed(glm::vec3(-0.5f, 0.5f, 0.0f), 0.5f);
 
 //---------------------------------------------------------------------------------------------------------
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
+
+		//Checks mouseclick
+		glfwSetMouseButtonCallback(window, mouse_button_callback);
+		if (movFlag) {
+			square->setSpeed(glm::vec3((movX - square->x())/800.0f, (movY - square->y())/ 600.0f, 0.0f), 0.5f);
+			triangle->setSpeed(glm::vec3((movX - triangle->x()) / 800.0f, (movY - triangle->y()) / 600.0f, 0.0f), 0.9f);
+			movFlag = false;
+		}
+
+
 		// Checks if events were triggered
 		glfwPollEvents();
 		// Set color to clear buffer
@@ -81,6 +109,10 @@ int main() {
 		// Calls update and draw from the square object
 		square->Update();
 		square->Draw();
+
+		//// Calls update and draw from the pentagon object
+		//pentagon->Update();
+		//pentagon->Draw();
 
 		// Swaps the back buffer to front buffer, displaying in the output
 		glfwSwapBuffers(window);
@@ -141,4 +173,13 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 	// ESC closes the window
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		glfwGetCursorPos(window, &movX, &movY);
+		std::cout << "pressed" << movX << "\t" << movY;
+		movY = 600 - movY;
+		movFlag = true;
+	}
 }
