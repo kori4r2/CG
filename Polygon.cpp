@@ -69,8 +69,6 @@ float Polygon::y() {
 void Polygon::setSpeed(glm::vec3 direction, float value) {
 	_speedDirection = glm::normalize(direction);
 	_speedValue = value;
-	_x = _curX;
-	_y = _curY;
 	_startTime = glfwGetTime();
 }
 
@@ -100,9 +98,8 @@ void Polygon::Update() {
 	glm::vec4 aux;
 	aux.x = _x;
 	aux.y = _y;
-	// Debug
-	if (_sides == 3)
-		std::cout << "current coordinates before transform: " << "(" << _curX << "," << _curY << ")" << std::endl;
+	aux.z = 0.0f;
+	aux.w = 1.0f;
 	// Gets the transform vector to be applied based on the speed vector
 	glm::mat4 transform;
 	transform = glm::translate(transform, (_speedDirection * _speedValue) * ((GLfloat)glfwGetTime() - _startTime));
@@ -110,9 +107,7 @@ void Polygon::Update() {
 	aux = transform * aux;
 	_curX = aux.x;
 	_curY = aux.y;
-	if(_sides == 3)
-		std::cout << "current coordinates after transform: " << "(" << _curX << "," << _curY << ")" << std::endl;
-	// To do: check if the object is out of bounds
+	// Check if the object is out of bounds
 	if (_curX + _radius < 0 || _curX - _radius > _width || _curY + _radius < 0 || _curY - _radius > _height) {
 		_startTime = glfwGetTime();
 	}

@@ -75,17 +75,15 @@ int main() {
 	glDeleteShader(greenFShader);
 
 	// Create polygons to be drawn on screen (best way would be to save inside a Polygon[] variable)
-	Polygon *triangle = new Polygon(200, 150, 100, 3, window);
+	Polygon *triangle = new Polygon(200, 150, 50, 3, window);
 	// Associates the object with a shader program
 	triangle->setShaderProgram(&blueShaderProgram);
 	Polygon *square = new Polygon(600, 450, 100, 4, window);
 	square->setShaderProgram(&redShaderProgram);
-	Polygon *pentagon = new Polygon(350, 350, 100, 5, window);
+	Polygon *pentagon = new Polygon(350, 350, 30, 5, window);
 	pentagon->setShaderProgram(&greenShaderProgram);
 
 	// Set speed and behaviours
-	square->setSpeed(glm::vec3(1.0f, 0.0f, 0.0f), 100.0f);
-	triangle->setSpeed(glm::vec3(-0.5f, 0.5f, 0.0f), 200.0f);
 
 //---------------------------------------------------------------------------------------------------------
 	// Game loop
@@ -93,8 +91,9 @@ int main() {
 
 		//Checks mouseclick
 		if (movFlag) {
-			square->setSpeed(glm::vec3((movX - square->x())/width, (movY - square->y())/ height, 0.0f), 100.0f);
-			triangle->setSpeed(glm::vec3((movX - triangle->x()) / width, (movY - triangle->y()) / height, 0.0f), 200.0f);
+			square->setSpeed(glm::vec3((movX - square->x()), (movY - square->y()), 0.0f), 100.0f);
+			triangle->setSpeed(glm::vec3((movX - triangle->x()), (movY - triangle->y()), 0.0f), 200.0f);
+			pentagon->setSpeed(glm::vec3((movX - pentagon->x()), (movY - pentagon->y()), 0.0f), 400.0f);
 			movFlag = false;
 		}
 
