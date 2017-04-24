@@ -16,7 +16,7 @@ private:
 	// _startTime is the time when the movement started, everytime setSpeed is called or the object
 	// goes out of the screen, it should be reset with _startTime = glfwGetTime() to make object come back
 	// to the starting position
-	float _x, _y, _radius, _startTime, _curX, _curY, _speedValue;
+	float _x, _y, _radius, _startTime, _speedValue;
 	int _sides, _width, _height;
 	GLfloat *_vertices;
 	GLuint *_indices;
@@ -25,7 +25,7 @@ private:
 	GLuint *_shaderProgram;
 
 	// Generates vertices and indices based on the polygon characteristics
-	void generateVertices(GLFWwindow*);
+	void generateVertices();
 
 public:
 	//	Creates a new polygon object. These x and y variables consider the bottom left corner of the
@@ -34,7 +34,7 @@ public:
 	// Some getters and setters
 	float x();
 	float y();
-	//	It's recomended that the direction value is normalized, but it's not a requirement
+	//	The direction vector will be normalized inside the function
 	void setSpeed(glm::vec3 direction, float value);
 	void setShaderProgram(GLuint *shaderProgram);
 	// Update and draw
