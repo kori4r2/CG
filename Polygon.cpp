@@ -12,9 +12,9 @@ void Polygon::generateVertices(GLFWwindow *window) {
 	float tetha = 2 * PI / (float)_sides;
 	// Fills the arrays
 	for (int i = 0; i < _sides; i++) {
-		// The values on the x and y axis have different scaling to avoid problems with different resolutions
-		_vertices[3 * i] = normalX + ((2 * _radius / _width) * sin(tetha * i));
-		_vertices[(3 * i) + 1] = normalY + ((2 * _radius / _height) * cos(tetha * i));
+		// The values on the x and y axis have different scaling to avoid problems with different resolutions not
+		_vertices[3 * i] = normalX + ((2 * 1.0) * sin(tetha * i));
+		_vertices[(3 * i) + 1] = normalY + ((2 * 1.0) * cos(tetha * i));
 		_vertices[(3 * i) + 2] = 1.0f;
 	}
 	// Saves vertices in order to draw all the triangles that make the full polygon
@@ -81,13 +81,18 @@ void Polygon::Update() {
 	glUseProgram(*_shaderProgram);
 
 	// Changes transform acording to current speed of the object
-	glm::mat4 gltransform;
+	glm::mat4 model, view, projection, local, gltransform;
 	glm::vec3 glSpeed = _speedDirection * _speedValue;
 	// Normalizes the speed vector according to the opengl coordinates
-	glSpeed.x = (glSpeed.x / _width) * 2;
-	glSpeed.y = (glSpeed.y / _height) * 2;
+	//glSpeed.x = (glSpeed.x / _width) * 2;
+	//glSpeed.y = (glSpeed.y / _height) * 2;
 	// gets the transform to be applied on the vertex shader
-	gltransform = glm::translate(gltransform, glSpeed * ((GLfloat)glfwGetTime() - _startTime));
+	model = glm::scale(model, glm::vec3(_radius, _radius, 1.0f));
+	model = glm::translate(model, glm::vec3(_curX, _curY, 0.0f));
+	model = glm::translate(model, glSpeed * ((GLfloat)glfwGetTime() - _startTime));
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -0.1f));
+	projection = glm::perspective(45.0f, (float)_width / (float)_height, 0.1f, 100.0f);
+	gltransform = projection * view * model;
 	// To do: apply angular speed
 
 	// Applies transform to shader program
