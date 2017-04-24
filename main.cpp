@@ -13,6 +13,7 @@ void key_callback(GLFWwindow*, int, int, int, int);
 void mouse_button_callback(GLFWwindow*, int, int, int);
 
 GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int height, const char *title);
+GLuint screenWidth, screenHeight;
 
 bool movFlag = false;
 double movX, movY;
@@ -25,9 +26,6 @@ int main() {
 	GLFWwindow *window = initWindow(3, 3, 800, 600, "janela");
 	if (!window)
 		return -1;
-
-	glfwGetFramebufferSize(window, &width, &height);
-
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -83,8 +81,6 @@ int main() {
 	Polygon *pentagon = new Polygon(350, 350, 30, 5, window);
 	pentagon->setShaderProgram(&greenShaderProgram);
 
-	// Set speed and behaviours
-
 //---------------------------------------------------------------------------------------------------------
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
@@ -132,6 +128,8 @@ int main() {
 GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int height, const char *title) {
 
 	GLFWwindow *window;
+	screenWidth = width;
+	screenHeight = height;
 
 	glfwInit();
 	// Specify opengl version
@@ -182,8 +180,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		glfwGetCursorPos(window, &movX, &movY);
-		std::cout << "pressed" << movX << "\t" << movY;
-		movY = 600 - movY;
+		std::cout << "pressed" << movX << "\t" << movY << std::endl;
+		movY = screenHeight - movY;
 		movFlag = true;
 	}
 }
