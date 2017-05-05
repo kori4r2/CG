@@ -117,11 +117,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Cube.cpp" />
     <ClCompile Include="myShaders.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Polygon.cpp" />
+    <ClCompile Include="Polyhedron.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="Cube.hpp" />
+    <ClInclude Include="Polyhedron.hpp" />
     <ClInclude Include="Polygon.hpp" />
     <ClInclude Include="myShaders.hpp" />
   </ItemGroup>

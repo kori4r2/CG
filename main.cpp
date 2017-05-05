@@ -6,6 +6,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "myShaders.hpp"
 #include "Polygon.hpp"
+#include "Cube.hpp"
+#include "Camera.hpp"
 #include <iostream>
 
 void key_callback(GLFWwindow*, int, int, int, int);
@@ -15,7 +17,7 @@ void mouse_button_callback(GLFWwindow*, int, int, int);
 GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int height, const char *title);
 GLuint screenWidth, screenHeight;
 
-bool movFlag = false;
+bool movFlag = false, keys[1024];
 double movX, movY;
 
 int main() {
@@ -26,6 +28,10 @@ int main() {
 	GLFWwindow *window = initWindow(3, 3, 800, 600, "janela");
 	if (!window)
 		return -1;
+
+	glEnable(GL_DEPTH_TEST);
+	Camera *camera = new Camera(keys);
+	camera->setSpeedValue(30.0f);
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -41,85 +47,42 @@ int main() {
 	if (!success)
 		return -1;
 
-	// Create and compile red fragment shader from code
-	GLuint redFShader = CreateSingleColorFShader(1.0f, 0.0f, 0.0f, 1.0f, &success);
-	if (!success)
-		return -1;
-
-	// Create and compile red fragment shader from code
-	GLuint greenFShader = CreateSingleColorFShader(0.0f, 1.0f, 0.0f, 1.0f, &success);
-	if (!success)
-		return -1;
-
 	// Creates shader program for blue color, attaches shaders and links the program
 	GLuint blueShaderProgram = LinkShaderProgram(vertexShader, blueFShader, &success);
 	if (!success)
 		return -1;
 
-	// Creates shader program for red color
-	GLuint redShaderProgram = LinkShaderProgram(vertexShader, redFShader, &success);
-	if (!success)
-		return -1;
-
-	// Creates shader program for green color
-	GLuint greenShaderProgram = LinkShaderProgram(vertexShader, greenFShader, &success);
-	if (!success)
-		return -1;
 
 	// The shaders are no longer needed
 	glDeleteShader(vertexShader);
 	glDeleteShader(blueFShader);
-	glDeleteShader(redFShader);
-	glDeleteShader(greenFShader);
 
-	// Create polygons to be drawn on screen (best way would be to save inside a Polygon[] variable)
-	Polygon *triangle = new Polygon(200, 150, 50, 3, window);
-	// Associates the object with a shader program
-	triangle->setShaderProgram(&blueShaderProgram);
-	Polygon *square = new Polygon(600, 450, 100, 4, window);
-	square->setShaderProgram(&redShaderProgram);
-	Polygon *pentagon = new Polygon(350, 350, 30, 5, window);
-	pentagon->setShaderProgram(&greenShaderProgram);
+	Cube *cube = new Cube(0.0f, 0.0f, -200.0f, 50.0f, window, camera);
+	cube->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 5.0f);
+	cube->setShaderProgram(&blueShaderProgram);
 
 //---------------------------------------------------------------------------------------------------------
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
 
-		//Checks mouseclick
-		if (movFlag) {
-			square->setSpeed(glm::vec3((movX - square->x()), (movY - square->y()), 0.0f), 100.0f);
-			triangle->setSpeed(glm::vec3((movX - triangle->x()), (movY - triangle->y()), 0.0f), 200.0f);
-			pentagon->setSpeed(glm::vec3((movX - pentagon->x()), (movY - pentagon->y()), 0.0f), 400.0f);
-			movFlag = false;
-		}
-
-
 		// Checks if events were triggered
 		glfwPollEvents();
+		// Updates camera position
+		camera->Update();
 		// Set color to clear buffer
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		// Clear color buffer
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Calls update and draw from the triangle object
-		triangle->Update();
-		triangle->Draw();
-
-		// Calls update and draw from the square object
-		square->Update();
-		square->Draw();
-
-		//// Calls update and draw from the pentagon object
-		pentagon->Update();
-		pentagon->Draw();
+		cube->Update();
+		cube->Draw();
 
 		// Swaps the back buffer to front buffer, displaying in the output
 		glfwSwapBuffers(window);
 	}
 
 //-----------------------------------------------------------------------------------------------------
-	delete(triangle);
-	delete(square);
+	delete(cube);
 
 	glfwTerminate();
 	return 0;
@@ -132,6 +95,9 @@ GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int he
 	screenHeight = height;
 
 	glfwInit();
+	for (int i = 0; i < 1024; i++)
+		keys[i] = false;
+
 	// Specify opengl version
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OpenGLverMajor);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OpenGLverMinor);
@@ -163,9 +129,7 @@ GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int he
 	}
 
 	// Set viewport dimensions
-	int bufferWidth, bufferHeight;
-	glfwGetFramebufferSize(window, &bufferWidth, &bufferHeight);
-	glViewport(0, 0, bufferWidth, bufferHeight);
+	glViewport(0, 0, screenWidth, screenHeight);
 
 	return window;
 }
@@ -175,6 +139,10 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 	// ESC closes the window
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+	if (action == GLFW_PRESS)
+		keys[key] = true;
+	else if (action == GLFW_RELEASE)
+		keys[key] = false;
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {

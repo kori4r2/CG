@@ -11,7 +11,7 @@ void Polygon::generateVertices() {
 		// The polygon is created with a radius of 1 by default
 		_vertices[3 * i] = (1.0f * sin(tetha * i));
 		_vertices[(3 * i) + 1] = (1.0f * cos(tetha * i));
-		_vertices[(3 * i) + 2] = 1.0f;
+		_vertices[(3 * i) + 2] = 0.0f;
 	}
 	// Saves vertices in order to draw all the triangles that make the full polygon
 	for (int i = 0; i < _sides - 2; i++) {
@@ -40,7 +40,7 @@ Polygon::Polygon(float x, float y, float radius, int sides, GLFWwindow *window) 
 	glBufferData(GL_ARRAY_BUFFER, 3 * _sides * sizeof(GLfloat), _vertices, GL_STATIC_DRAW);
 	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _sides * sizeof(GLuint), _indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * (_sides - 2) * sizeof(GLuint), _indices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
@@ -114,8 +114,9 @@ void Polygon::Draw() {
 	// the scale applies the polygon radius
 	model = glm::scale(model, glm::vec3(_radius, _radius, 1.0f));
 	// moves the camera back a bit
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -1.0f));
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 	// applies orthogonal view
+	//projection = glm::perspective(45.0f, (float)_width / (float)_height, 0.1f, 1000.0f);
 	projection = glm::ortho(0.0f, (float)_width, 0.0f, (float)_height, 0.0f, 1000.0f);
 	// Passes the resulting transform matrix to the vertex shader
 	gltransform = projection * view * model;
