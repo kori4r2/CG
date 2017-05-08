@@ -26,8 +26,8 @@ void Cube::generateVertices() {
 		std::cout << std::endl;
 	}
 }
-Cube::Cube(float x, float y, float z, float radius, GLFWwindow *window, Camera *camera) 
-	: Polyhedron(x, y, z,  radius, window, camera) {
+Cube::Cube(float x, float y, float z, float radius, Camera *camera, GLFWwindow *window)
+	: Polyhedron(x, y, z,  radius, camera, window) {
 	_nFaces = 6;
 	_nSidesFaces = 4;
 	generateVertices();

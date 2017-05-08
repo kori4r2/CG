@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "Camera.hpp"
 
 #define PI 3.14159265359
 
@@ -16,6 +17,7 @@ private:
 	// _startTime is the time when the movement started, everytime setSpeed is called or the object
 	// goes out of the screen, it should be reset with _startTime = glfwGetTime() to make object come back
 	// to the starting position
+	Camera *_camera;
 	float _x, _y, _radius, _startTime, _speedValue;
 	int _sides, _width, _height;
 	GLfloat *_vertices;
@@ -30,7 +32,7 @@ private:
 public:
 	//	Creates a new polygon object. These x and y variables consider the bottom left corner of the
 	// window as the point of origin and window width and height as maximum values
-	Polygon(float x, float y, float radius, int sides, GLFWwindow *window);
+	Polygon(float x, float y, float radius, int sides, Camera *camera, GLFWwindow *window);
 	// Some getters and setters
 	float x();
 	float y();

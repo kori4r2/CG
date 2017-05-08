@@ -17,7 +17,7 @@ void mouse_button_callback(GLFWwindow*, int, int, int);
 GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int height, const char *title);
 GLuint screenWidth, screenHeight;
 
-bool movFlag = false, keys[1024];
+bool movFlag = false, jumpFlag = false, keys[1024];
 double movX, movY;
 
 int main() {
@@ -30,8 +30,9 @@ int main() {
 		return -1;
 
 	glEnable(GL_DEPTH_TEST);
-	Camera *camera = new Camera(keys);
+	Camera *camera = new Camera(keys, window);
 	camera->setSpeedValue(30.0f);
+	camera->enableGravity();
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -47,8 +48,18 @@ int main() {
 	if (!success)
 		return -1;
 
+	// Create and compile red fragment shader from code
+	GLuint redFShader = CreateRedFShader(&success);
+	if (!success)
+		return -1;
+
 	// Creates shader program for blue color, attaches shaders and links the program
 	GLuint blueShaderProgram = LinkShaderProgram(vertexShader, blueFShader, &success);
+	if (!success)
+		return -1;
+
+	// Creates shader program for red color, attaches shaders and links the program
+	GLuint redShaderProgram = LinkShaderProgram(vertexShader, redFShader, &success);
 	if (!success)
 		return -1;
 
@@ -56,9 +67,15 @@ int main() {
 	// The shaders are no longer needed
 	glDeleteShader(vertexShader);
 	glDeleteShader(blueFShader);
+	glDeleteShader(redFShader);
 
-	Cube *cube = new Cube(0.0f, 0.0f, -200.0f, 50.0f, window, camera);
+	Polygon *square = new Polygon(300, 300, 50, 4, camera, window);
+	square->setShaderProgram(&redShaderProgram);
+
+	Cube *cube = new Cube(0.0f, 0.0f, -200.0f, 30.0f, camera, window);
 	cube->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 5.0f);
+	cube->setSpeed(glm::vec3(0.0f, 1.0f, 0.0f), 200);
+	cube->enableGravity();
 	cube->setShaderProgram(&blueShaderProgram);
 
 //---------------------------------------------------------------------------------------------------------
@@ -67,6 +84,16 @@ int main() {
 
 		// Checks if events were triggered
 		glfwPollEvents();
+		//Checks mouseclick
+		if (movFlag) {
+			square->setSpeed(glm::vec3((movX - square->x()), (movY - square->y()), 0.0f), 200.0f);
+			movFlag = false;
+		}
+		// Checks spacebar press
+		if (jumpFlag) {
+			camera->jump(100);
+			jumpFlag = false;
+		}
 		// Updates camera position
 		camera->Update();
 		// Set color to clear buffer
@@ -77,12 +104,16 @@ int main() {
 		cube->Update();
 		cube->Draw();
 
+		square->Update();
+		square->Draw();
+
 		// Swaps the back buffer to front buffer, displaying in the output
 		glfwSwapBuffers(window);
 	}
 
 //-----------------------------------------------------------------------------------------------------
 	delete(cube);
+	delete(square);
 
 	glfwTerminate();
 	return 0;
@@ -139,6 +170,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 	// ESC closes the window
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+		jumpFlag = true;
 	if (action == GLFW_PRESS)
 		keys[key] = true;
 	else if (action == GLFW_RELEASE)

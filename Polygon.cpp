@@ -21,8 +21,9 @@ void Polygon::generateVertices() {
 	}
 }
 
-Polygon::Polygon(float x, float y, float radius, int sides, GLFWwindow *window) {
+Polygon::Polygon(float x, float y, float radius, int sides, Camera *camera, GLFWwindow *window) {
 	// Gets variables ready
+	_camera = camera;
 	_x  = x;
 	_y  = y;
 	_radius = radius;
@@ -114,10 +115,9 @@ void Polygon::Draw() {
 	// the scale applies the polygon radius
 	model = glm::scale(model, glm::vec3(_radius, _radius, 1.0f));
 	// moves the camera back a bit
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	view = _camera->view2D;
 	// applies orthogonal view
-	//projection = glm::perspective(45.0f, (float)_width / (float)_height, 0.1f, 1000.0f);
-	projection = glm::ortho(0.0f, (float)_width, 0.0f, (float)_height, 0.0f, 1000.0f);
+	projection = _camera->projection2D;
 	// Passes the resulting transform matrix to the vertex shader
 	gltransform = projection * view * model;
 

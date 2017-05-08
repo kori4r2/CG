@@ -14,22 +14,28 @@ private:
 
 protected:
 	static const GLfloat cubeVertices[], cubeIndices[], tetrahedronVertices[], tetrahedronIndices[];
-	float _x, _y, _z, _startTime, _currentTime, _radius, _speedValue, _angularSpeedValue, _angle;
+	bool _hasGravity;
+	float _x, _y, _z, _radius, _speedValue, _angularSpeedValue, _angle, _gravityValue, _startTime, _currentTime;
 	int _width, _height, _nFaces, _nSidesFaces;
 	GLfloat *_vertices;
 	GLuint *_indices;
-	glm::vec3 *_speedDirection, *_rotationAxis;
+	glm::vec3 *_speed, *_rotationAxis, *_gravity;
 	GLuint _VAO, _VBO, _EBO;
 	GLuint *_shaderProgram;
 	Camera *_camera;
 
 public:
-	Polyhedron(float x, float y, float z, float radius, GLFWwindow *window, Camera *camera);
+	Polyhedron(float x, float y, float z, float radius, Camera *camera, GLFWwindow *window);
 	// Some getters and setters
 	float x();
 	float y();
 	float z();
 	//	The direction vector will be normalized inside the function
+	void setGravity(float value);
+	void enableGravity();
+	void disableGravity();
+	void setPosition(float x, float y, float z);
+	void setPosition(glm::vec3 position);
 	void setSpeed(glm::vec3 direction, float value);
 	void setSpeed(float value);
 	void setAngle(float value);
