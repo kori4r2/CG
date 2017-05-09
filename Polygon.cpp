@@ -1,7 +1,7 @@
 #include "Polygon.hpp"
 
 void Polygon::generateVertices() {
-	// Create vertices and index arrays
+	// Create vertices and indices arrays
 	_vertices = new GLfloat[_sides * 3];
 	_indices = new GLuint[(_sides - 2) * 3];
 	// Determines angle to spin and create new vertices
@@ -13,7 +13,7 @@ void Polygon::generateVertices() {
 		_vertices[(3 * i) + 1] = (1.0f * cos(tetha * i));
 		_vertices[(3 * i) + 2] = 0.0f;
 	}
-	// Saves vertices in order to draw all the triangles that make the full polygon
+	// Saves vertice references in order to draw all the triangles that make the full polygon
 	for (int i = 0; i < _sides - 2; i++) {
 		_indices[3 * i] = 0;
 		_indices[(3 * i) + 1] = i + 1;
@@ -53,7 +53,7 @@ Polygon::Polygon(float x, float y, float radius, int sides, Camera *camera, GLFW
 	// Sets movement related variables
 	_speedDirection = glm::vec3(0.0f, 0.0f, 0.0f);
 	_speedValue = 0;
-	_startTime = glfwGetTime();
+	_startTime = (float)glfwGetTime();
 }
 
 float Polygon::x() {
@@ -75,8 +75,7 @@ void Polygon::setShaderProgram(GLuint *shaderProgram) {
 
 void Polygon::Update() {
 
-	// Applies the speed to x and y, using the window coordinates
-
+	// The aux vector is used to apply transformations more easily
 	glm::vec4 aux = glm::vec4(_x, _y, 0.0f, 1.0f);
 	glm::mat4 transform;
 	// Gets the current time and applies transform based on deltaTime between updates
@@ -109,14 +108,13 @@ void Polygon::Draw() {
 	// model transform changes from local space to world space, view changes from world to view space
 	// and projection changes from view space to clip space. glTransform contains the resulting transform matrix
 	glm::mat4 model, view, projection, gltransform;
-	glm::vec3 glSpeed = _speedDirection * _speedValue;
 	// the translation moves the polygon to it's location in world space
 	model = glm::translate(model, glm::vec3(_x, _y, 0.0f));
 	// the scale applies the polygon radius
 	model = glm::scale(model, glm::vec3(_radius, _radius, 1.0f));
-	// moves the camera back a bit
+	// gets the view matrix from camera
 	view = _camera->view2D;
-	// applies orthogonal view
+	// gets the projection matrix from camera
 	projection = _camera->projection2D;
 	// Passes the resulting transform matrix to the vertex shader
 	gltransform = projection * view * model;
@@ -125,7 +123,7 @@ void Polygon::Draw() {
 	GLuint transformLoc = glGetUniformLocation(*_shaderProgram, "transform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(gltransform));
 
-	// Draws the object, no surprises
+	// Draws the object
 	glBindVertexArray(_VAO);
 	glDrawElements(GL_TRIANGLES, (_sides - 2) * 3, GL_UNSIGNED_INT, _indices);
 	glBindVertexArray(0);

@@ -10,28 +10,29 @@
 #include "Camera.hpp"
 #include <iostream>
 
+// Callback functions
 void key_callback(GLFWwindow*, int, int, int, int);
-
 void mouse_button_callback(GLFWwindow*, int, int, int);
-
+// Creates a window using the desired parameters
 GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int height, const char *title);
-GLuint screenWidth, screenHeight;
 
+GLuint screenWidth, screenHeight;
 bool movFlag = false, jumpFlag = false, keys[1024];
 double movX, movY;
 
 int main() {
-
-	int width, height;
 
 	// Creates the window
 	GLFWwindow *window = initWindow(3, 3, 800, 600, "janela");
 	if (!window)
 		return -1;
 
+	// Enables depth test for z-buffer
 	glEnable(GL_DEPTH_TEST);
+	// Creates the camera
 	Camera *camera = new Camera(keys, window);
-	camera->setSpeedValue(30.0f);
+	// Sets camera values
+	camera->setSpeedValue(50.0f);
 	camera->enableGravity();
 
 //-------------------------------------------------------------------------------------------------------
@@ -69,11 +70,14 @@ int main() {
 	glDeleteShader(blueFShader);
 	glDeleteShader(redFShader);
 
+	// Creates a red square
 	Polygon *square = new Polygon(300, 300, 50, 4, camera, window);
 	square->setShaderProgram(&redShaderProgram);
 
+	// Creates a blue rotating cube
 	Cube *cube = new Cube(0.0f, 0.0f, -200.0f, 30.0f, camera, window);
 	cube->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 5.0f);
+	// Throws it up and activates gravity
 	cube->setSpeed(glm::vec3(0.0f, 1.0f, 0.0f), 200);
 	cube->enableGravity();
 	cube->setShaderProgram(&blueShaderProgram);
@@ -86,14 +90,17 @@ int main() {
 		glfwPollEvents();
 		//Checks mouseclick
 		if (movFlag) {
+			// Moves square to position clicked
 			square->setSpeed(glm::vec3((movX - square->x()), (movY - square->y()), 0.0f), 200.0f);
 			movFlag = false;
 		}
 		// Checks spacebar press
 		if (jumpFlag) {
+			// Jumps with the camera
 			camera->jump(100);
 			jumpFlag = false;
 		}
+
 		// Updates camera position
 		camera->Update();
 		// Set color to clear buffer
@@ -101,6 +108,7 @@ int main() {
 		// Clear color buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// Updates and draws the objects
 		cube->Update();
 		cube->Draw();
 
@@ -112,16 +120,19 @@ int main() {
 	}
 
 //-----------------------------------------------------------------------------------------------------
+	// Ends execution
 	delete(cube);
 	delete(square);
-
+	delete(camera);
 	glfwTerminate();
+
 	return 0;
 }
 
 GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int height, const char *title) {
 
 	GLFWwindow *window;
+	// Saves window dimensions
 	screenWidth = width;
 	screenHeight = height;
 
@@ -146,7 +157,7 @@ GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int he
 	}
 	// Make it the current context
 	glfwMakeContextCurrent(window);
-	// Set the callback function
+	// Set the callback functions
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
@@ -170,8 +181,10 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 	// ESC closes the window
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+	// Space bar sets a jump flag
 	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
 		jumpFlag = true;
+	// Any key press/release alters the state inside the keys vector
 	if (action == GLFW_PRESS)
 		keys[key] = true;
 	else if (action == GLFW_RELEASE)
@@ -179,6 +192,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+	// Saves the position clicked and sets a corresponding flag
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		glfwGetCursorPos(window, &movX, &movY);
 		std::cout << "pressed" << movX << "\t" << movY << std::endl;
