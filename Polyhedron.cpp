@@ -39,7 +39,7 @@ Polyhedron::Polyhedron(float x, float y, float z, float radius, Camera *camera, 
 	_y = y;
 	_z = z;
 	_radius = radius;
-	_gravityValue = 150.0f;
+	_gravityValue = 200.0f;
 	_speed = new glm::vec3(0.0f, 0.0f, 0.0f);
 	_rotationAxis = new glm::vec3(0.0f, 1.0f, 0.0f);
 	_gravity = new glm::vec3(0.0f, -1.0f, 0.0f);
@@ -124,6 +124,8 @@ void Polyhedron::Update() {
 	_currentTime = (float)glfwGetTime();
 	float deltaTime = _currentTime - _startTime;
 	_angle += (_angularSpeedValue * deltaTime);
+	if (_angle > 360.0f)
+		_angle -= 360.0f;
 	glm::vec3 gravityEffect = (*_gravity) * _gravityValue * deltaTime;
 
 	// IF the object is affected by gravity, calculates the new speed
