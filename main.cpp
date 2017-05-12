@@ -13,12 +13,13 @@
 // Callback functions
 void key_callback(GLFWwindow*, int, int, int, int);
 void mouse_button_callback(GLFWwindow*, int, int, int);
+void mouse_callback(GLFWwindow*, double, double);
 // Creates a window using the desired parameters
 GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int height, const char *title);
 
 GLuint screenWidth, screenHeight;
 bool movFlag = false, jumpFlag = false, keys[1024];
-double movX, movY;
+double movX, movY, xPos, yPos;
 
 int main() {
 
@@ -30,7 +31,7 @@ int main() {
 	// Enables depth test for z-buffer
 	glEnable(GL_DEPTH_TEST);
 	// Creates the camera
-	Camera *camera = new Camera(keys, window);
+	Camera *camera = new Camera(keys, window, &xPos, &yPos);
 	// Sets camera values
 	camera->setSpeedValue(50.0f);
 	camera->enableGravity();
@@ -45,12 +46,12 @@ int main() {
 		return -1;
 
 	// Create and compile blue fragment shader from code
-	GLuint blueFShader = CreateBlueFShader(&success);
+	GLuint blueFShader = CreateSingleColorFShader(0.1f, 0.1f, 0.9f, 1.0f, &success);
 	if (!success)
 		return -1;
 
 	// Create and compile red fragment shader from code
-	GLuint redFShader = CreateRedFShader(&success);
+	GLuint redFShader = CreateSingleColorFShader(0.9f, 0.1f, 0.1f, 0.1f, &success);
 	if (!success)
 		return -1;
 
@@ -71,7 +72,7 @@ int main() {
 	glDeleteShader(redFShader);
 
 	// Creates a red square
-	Polygon *square = new Polygon(300, 300, 50, 4, camera, window);
+	Polygon *square = new Polygon((screenWidth / 2), (screenHeight / 2), 25, 4, camera, window);
 	square->setShaderProgram(&redShaderProgram);
 
 	// Creates a blue rotating cube
@@ -157,9 +158,13 @@ GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int he
 	}
 	// Make it the current context
 	glfwMakeContextCurrent(window);
+
+	// Hides mouse cursor, and make sure it stays inside the window
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	// Set the callback functions
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
 
 	// Initialize glew
 	glewExperimental = GL_TRUE;
@@ -199,4 +204,9 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		movY = screenHeight - movY;
 		movFlag = true;
 	}
+}
+
+void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+	yPos = ypos;
+	xPos = xpos;
 }
