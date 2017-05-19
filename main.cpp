@@ -6,9 +6,25 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "myShaders.hpp"
 #include "Polygon.hpp"
-#include "Cube.hpp"
+#include "my3dObjects.hpp"
 #include "Camera.hpp"
 #include <iostream>
+
+/*
+// Debugging
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+int nada = _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+#ifdef _DEBUG
+#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+// Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
+// allocations to be of _CLIENT_BLOCK type
+#else
+#define DBG_NEW new
+#endif
+*/
 
 // Callback functions
 void key_callback(GLFWwindow*, int, int, int, int);
@@ -30,6 +46,9 @@ int main() {
 
 	// Enables depth test for z-buffer
 	glEnable(GL_DEPTH_TEST);
+	// Enable color blending
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Creates the camera
 	Camera *camera = new Camera(keys, window, &xPos, &yPos);
 	// Sets camera values
@@ -50,8 +69,13 @@ int main() {
 	if (!success)
 		return -1;
 
-	// Create and compile red fragment shader from code
-	GLuint redFShader = CreateSingleColorFShader(0.9f, 0.1f, 0.1f, 0.1f, &success);
+	// Create and compile semi transparent red fragment shader from code
+	GLuint redFShader = CreateSingleColorFShader(0.9f, 0.1f, 0.1f, 0.5f, &success);
+	if (!success)
+		return -1;
+
+	// Create and compiler brown fragment shader from code
+	GLuint brownFShader = CreateSingleColorFShader(0.3f, 0.1f, 0.05f, 1.0f, &success);
 	if (!success)
 		return -1;
 
@@ -65,23 +89,42 @@ int main() {
 	if (!success)
 		return -1;
 
+	// Creates shader program for brown color, attaches shaders and links the program
+	GLuint brownShaderProgram = LinkShaderProgram(vertexShader, brownFShader, &success);
+	if (!success)
+		return -1;
+
 
 	// The shaders are no longer needed
 	glDeleteShader(vertexShader);
 	glDeleteShader(blueFShader);
 	glDeleteShader(redFShader);
+	glDeleteShader(brownFShader);
 
 	// Creates a red square
 	Polygon *square = new Polygon((screenWidth / 2), (screenHeight / 2), 25, 4, camera, window);
 	square->setShaderProgram(&redShaderProgram);
 
 	// Creates a blue rotating cube
-	Cube *cube = new Cube(0.0f, 0.0f, -200.0f, 30.0f, camera, window);
+	Cube *cube = new Cube(100.0f, 30.0f, -400.0f, 30.0f, camera, window);
 	cube->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 5.0f);
 	// Throws it up and activates gravity
-	cube->setSpeed(glm::vec3(0.0f, 1.0f, 0.0f), 200);
+	cube->setSpeed(glm::vec3(0.0f, 1.0f, 0.0f), 400);
 	cube->enableGravity();
 	cube->setShaderProgram(&blueShaderProgram);
+
+	Tetrahedron *tetrahedron = new Tetrahedron(0.0f, 200.0f, -400.0f, 30.0f, camera, window);
+	tetrahedron->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 5.0f);
+	tetrahedron->enableGravity();
+	tetrahedron->setShaderProgram(&blueShaderProgram);
+
+	Sphere *sphere = new Sphere(-100.0f, 150.0f, -400.0f, 15.0f, camera, window);
+	sphere->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 5.0f);
+	sphere->enableGravity();
+	sphere->setShaderProgram(&blueShaderProgram);
+
+	Plane *plane = new Plane(0.0f, -0.1f, 0.0f, 5000.0f, camera, window);
+	plane->setShaderProgram(&brownShaderProgram);
 
 //---------------------------------------------------------------------------------------------------------
 	// Game loop
@@ -89,12 +132,16 @@ int main() {
 
 		// Checks if events were triggered
 		glfwPollEvents();
+
+		/*
 		//Checks mouseclick
 		if (movFlag) {
 			// Moves square to position clicked
 			square->setSpeed(glm::vec3((movX - square->x()), (movY - square->y()), 0.0f), 200.0f);
 			movFlag = false;
 		}
+		*/
+
 		// Checks spacebar press
 		if (jumpFlag) {
 			// Jumps with the camera
@@ -110,9 +157,20 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Updates and draws the objects
+
+		plane->Update();
+		plane->Draw();
+
 		cube->Update();
 		cube->Draw();
 
+		tetrahedron->Update();
+		tetrahedron->Draw();
+
+		sphere->Update();
+		sphere->Draw();
+
+		// GUI (2D objects) update/draw functions must be called after 3D objects
 		square->Update();
 		square->Draw();
 
@@ -122,6 +180,9 @@ int main() {
 
 //-----------------------------------------------------------------------------------------------------
 	// Ends execution
+	delete(plane);
+	delete(sphere);
+	delete(tetrahedron);
 	delete(cube);
 	delete(square);
 	delete(camera);

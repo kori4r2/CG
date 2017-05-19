@@ -4,6 +4,7 @@ Camera::Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mou
 	// sets the values of the const variables
 	: _upVector(glm::vec3(0.0f, 1.0f, 0.0f)), projection(_projection), view(_view), view2D(_view2D), projection2D(_projection2D){
 	// Gets variables ready
+	_eyeHeight = 5.0f;
 	_firstMouse = true;
 	_mouseX = mousex;
 	_mouseY = mousey;
@@ -165,7 +166,9 @@ void Camera::Update() {
 	// Updates the time
 	_lastTime = currentTime;
 	// Updates view matrix based on new camera position
+	_cameraPosition->y += _eyeHeight;
 	_view = glm::lookAt(*_cameraPosition, (*_cameraPosition) + (*_cameraFront), *_cameraUp);
+	_cameraPosition->y -= _eyeHeight;
 }
 Camera::~Camera() {
 	// Frees allocated memory
