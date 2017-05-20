@@ -44,5 +44,6 @@ public:
 	// Update and draw
 	void Update();
 	void Draw();
+	// Destructor
 	~Polygon();
 };

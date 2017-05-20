@@ -4,6 +4,7 @@ Camera::Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mou
 	// sets the values of the const variables
 	: _upVector(glm::vec3(0.0f, 1.0f, 0.0f)), projection(_projection), view(_view), view2D(_view2D), projection2D(_projection2D){
 	// Gets variables ready
+	_eyeHeight = 20.0f;
 	_firstMouse = true;
 	_mouseX = mousex;
 	_mouseY = mousey;
@@ -109,6 +110,7 @@ void Camera::Update() {
 	
 	// Uses the aux vector to aplly the rotations easily
 	// The right/left rotation must be applied to both the _cameraFront and the _cameraRight vectors
+	// Obs.: For some unknown reason updating _cameraRight vector with cross product breaks stuff
 	glm::vec4 aux = glm::vec4(*_cameraFront, 1.0f);
 	*_cameraFront = glm::rotate(glm::mat4(), (float)xOffset, _upVector) * aux;
 	aux = glm::vec4(*_cameraRight, 1.0f);
@@ -146,8 +148,16 @@ void Camera::Update() {
 		speedDirection = glm::normalize(speedDirection);
 	// Resets camera speed on the xz plane
 	_cameraSpeed->x = _cameraSpeed->z = 0;
+
+	// If any shift key is being pressed, increases speed
+	_speedValue *= (_keys[GLFW_KEY_LEFT_SHIFT] || _keys[GLFW_KEY_RIGHT_SHIFT]) ? 1.75f : 1.0f;
+
 	// Applies the new desired speed
 	*_cameraSpeed += _speedValue * speedDirection;
+
+	// reverts _speedValue back to it's original value
+	_speedValue /= (_keys[GLFW_KEY_LEFT_SHIFT] || _keys[GLFW_KEY_RIGHT_SHIFT]) ? 1.75f : 1.0f;
+
 	// gets current time to calculate deltaTime between updates
 	float currentTime = (float)glfwGetTime();
 
@@ -164,8 +174,17 @@ void Camera::Update() {
 	}
 	// Updates the time
 	_lastTime = currentTime;
+
+	// Applies _eyeHeight elevation if a CONTROL key is not pressed
+	if(!_keys[GLFW_KEY_LEFT_CONTROL] && !_keys[GLFW_KEY_RIGHT_CONTROL])
+		_cameraPosition->y += _eyeHeight;
+
 	// Updates view matrix based on new camera position
 	_view = glm::lookAt(*_cameraPosition, (*_cameraPosition) + (*_cameraFront), *_cameraUp);
+
+	// Undoes the _eyeHeight elevation if needed
+	if (!_keys[GLFW_KEY_LEFT_CONTROL] && !_keys[GLFW_KEY_RIGHT_CONTROL])
+		_cameraPosition->y -= _eyeHeight;
 }
 Camera::~Camera() {
 	// Frees allocated memory
