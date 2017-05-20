@@ -12,7 +12,7 @@ const GLfloat Polyhedron::cubeVertices[] = {
 };
 
 const GLfloat Polyhedron::cubeIndices[] = {
-	0, 4, 5, 1, // each 3 consecutive vertices in this line should draw a triangle
+	0, 4, 5, 1,
 	1, 5, 7, 3,
 	3, 2, 0, 1,
 	7, 6, 4, 5,
@@ -50,7 +50,7 @@ Polyhedron::Polyhedron(float x, float y, float z, float radius, Camera *camera, 
 	_startTime = (float)glfwGetTime();
 }
 
-// Lots of setters from this point
+// Lots of getters and setters from this point
 float Polyhedron::x() {
 	return _x;
 }
@@ -126,12 +126,13 @@ void Polyhedron::Update() {
 	_angle += (_angularSpeedValue * deltaTime);
 	if (_angle > 360.0f)
 		_angle -= 360.0f;
+
 	glm::vec3 gravityEffect = (*_gravity) * _gravityValue * deltaTime;
 
 	// IF the object is affected by gravity, calculates the new speed
 	if (_hasGravity) {
 		(*_speed) += gravityEffect;
-		_speedValue = _speed->length();
+		_speedValue = glm::length(*_speed);
 	}
 
 	// Sees how much the object should move
@@ -165,7 +166,7 @@ void Polyhedron::Draw() {
 	// the translation moves the polyhedron to it's location in world space
 	model = glm::translate(model, glm::vec3(_x, _y, _z));
 	// the rotation applies the current angle rotation
-	model = glm::rotate(model, (float)_angle, *_rotationAxis);
+	model = glm::rotate(model, glm::radians(_angle), *_rotationAxis);
 	// the scale applies the polyhedron radius
 	model = glm::scale(model, glm::vec3(_radius, _radius, _radius));
 	// Gets the view matrix from the camera

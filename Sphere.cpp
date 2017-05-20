@@ -2,7 +2,7 @@
 
 void Sphere::generateVertices() {
 
-	_vertices = new GLfloat[3 * _rings * _sectors];
+	_vertices = new GLfloat[3 * (_rings * _sectors)];
 	_indices = new GLuint[(_rings - 1) * _sectors * 4];
 
 	for(int r = 0; r < _rings; r++){
@@ -10,7 +10,8 @@ void Sphere::generateVertices() {
 			// Determines height (goes from -1 to 1)
 			float y = sin( ((-0.5f) * PI) + (PI * (r / (float)(_rings - 1))) );
 			// sin( PI * (r/(_rings-1)) ) determines the radius of the xz plane circle at the current height
-			// uses cos and sin( 2*PI * (s * (_sectors-1)) ) to go through the xz plane circle counterclockwise
+			// Uses cos and sin( 2*PI * (s * (_sectors-1)) ) to go through the xz plane circle counterclockwise,
+			// generating evenly spaced vertices, one for each sector
 			float x = cos( (2 * PI * (s / (float)(_sectors)) ) ) * sin( PI * (r / (float)(_rings - 1)) );
 			float z = sin( (2 * PI * (s / (float)(_sectors)) ) ) * sin( PI * (r / (float)(_rings - 1)) );
 			// Saves the vertix coordinates
@@ -38,7 +39,7 @@ Sphere::Sphere(float x, float y, float z, float radius, Camera *camera, GLFWwind
 	// Sets variables that weren't set by base constructor
 	_nFaces = 1;
 	_nSidesFaces = 0;
-	// Determines how segmented the sphere will be, higher values have smoother but heavier spheres
+	// Determines how segmented the sphere will be, higher values have smoother but heavier to load spheres
 	_sectors = 15;
 	_rings = 15;
 	// Generates vertices
@@ -50,7 +51,7 @@ Sphere::Sphere(float x, float y, float z, float radius, Camera *camera, GLFWwind
 
 	glBindVertexArray(_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-	glBufferData(GL_ARRAY_BUFFER, 3 * _rings * _sectors/*number of vertices*/ * sizeof(GLfloat), _vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 3 * (_rings * _sectors)/*number of vertices*/ * sizeof(GLfloat), _vertices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * (_rings - 1) * _sectors * sizeof(GLuint), _indices, GL_STATIC_DRAW);
@@ -73,11 +74,11 @@ void Sphere::Draw() {
 	glm::mat4 view;
 	glm::mat4 projection;
 	glm::mat4 gltransform;
-	// the translation moves the polyhedron to it's location in world space
+	// the translation moves the sphere to it's location in world space
 	model = glm::translate(model, glm::vec3(_x, _y, _z));
 	// the rotation applies the current angle rotation
-	model = glm::rotate(model, (float)_angle, *_rotationAxis);
-	// the scale applies the polyhedron radius
+	model = glm::rotate(model, glm::radians(_angle), *_rotationAxis);
+	// the scale applies the sphere radius
 	model = glm::scale(model, glm::vec3(_radius, _radius, _radius));
 	// Gets the view matrix from the camera
 	view = _camera->view;

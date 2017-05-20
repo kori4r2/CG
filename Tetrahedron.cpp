@@ -46,4 +46,5 @@ Tetrahedron::Tetrahedron(float x, float y, float z, float radius, Camera *camera
 }
 
 Tetrahedron::~Tetrahedron() {
+	// Nothing to add to base class destructor
 }

@@ -16,7 +16,7 @@ Plane::Plane(float x, float y, float z, float radius, Camera *camera, GLFWwindow
 	glfwGetFramebufferSize(window, &_width, &_height);
 	_startTime = (float)glfwGetTime();
 
-	// Sets the vertices and indices arrays to draw a square
+	// Sets the vertices and indices arrays to draw a square on the xz plane
 	GLfloat aux[] = {
 		-0.577350f, 0.0f, -0.577350f,
 		-0.577350f, 0.0f, 0.577350f,
@@ -49,7 +49,7 @@ Plane::Plane(float x, float y, float z, float radius, Camera *camera, GLFWwindow
 	glBindVertexArray(0);
 }
 
-// Lots of setters from this point
+// Lots of getters and setters from this point
 float Plane::x() {
 	return _x;
 }
@@ -87,12 +87,6 @@ void Plane::setSpeed(float value) {
 
 void Plane::setAngle(float value) {
 	_angle = value;
-}
-
-void Plane::setAngularSpeed(glm::vec3 axis, float value) {
-	// The axis vector is normalized before being stored
-	*_rotationAxis = glm::normalize(axis);
-	_angularSpeedValue = value;
 }
 
 void Plane::setAngularSpeed(float value) {
@@ -139,7 +133,7 @@ void Plane::Draw() {
 	// the translation moves the Plane to it's location in world space
 	model = glm::translate(model, glm::vec3(_x, _y, _z));
 	// the rotation applies the current angle rotation
-	model = glm::rotate(model, (float)_angle, *_rotationAxis);
+	model = glm::rotate(model, glm::radians(_angle), *_rotationAxis);
 	// the scale applies the Plane radius
 	model = glm::scale(model, glm::vec3(_radius, _radius, _radius));
 	// Gets the view matrix from the camera

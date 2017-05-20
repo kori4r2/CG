@@ -57,11 +57,11 @@ void Cube::Draw() {
 	glm::mat4 view;
 	glm::mat4 projection;
 	glm::mat4 gltransform;
-	// the translation moves the polyhedron to it's location in world space
+	// the translation moves the cube to it's location in world space
 	model = glm::translate(model, glm::vec3(_x, _y, _z));
 	// the rotation applies the current angle rotation
-	model = glm::rotate(model, (float)_angle, *_rotationAxis);
-	// the scale applies the polyhedron radius
+	model = glm::rotate(model, glm::radians(_angle), *_rotationAxis);
+	// the scale applies the cube radius
 	model = glm::scale(model, glm::vec3(_radius, _radius, _radius));
 	// Gets the view matrix from the camera
 	view = _camera->view;

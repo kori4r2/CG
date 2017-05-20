@@ -32,7 +32,7 @@ void mouse_button_callback(GLFWwindow*, int, int, int);
 void mouse_callback(GLFWwindow*, double, double);
 // Creates a window using the desired parameters
 GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int height, const char *title);
-
+// Global variables
 GLuint screenWidth, screenHeight;
 bool movFlag = false, jumpFlag = false, keys[1024];
 double movX, movY, xPos, yPos;
@@ -52,7 +52,7 @@ int main() {
 	// Creates the camera
 	Camera *camera = new Camera(keys, window, &xPos, &yPos);
 	// Sets camera values
-	camera->setSpeedValue(50.0f);
+	camera->setSpeedValue(70.0f);
 	camera->enableGravity();
 
 //-------------------------------------------------------------------------------------------------------
@@ -107,22 +107,25 @@ int main() {
 
 	// Creates a blue rotating cube
 	Cube *cube = new Cube(100.0f, 30.0f, -400.0f, 30.0f, camera, window);
-	cube->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 5.0f);
+	cube->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 72.0f);
 	// Throws it up and activates gravity
 	cube->setSpeed(glm::vec3(0.0f, 1.0f, 0.0f), 400);
 	cube->enableGravity();
 	cube->setShaderProgram(&blueShaderProgram);
 
+	// Creates a blue rotating tetrahedron
 	Tetrahedron *tetrahedron = new Tetrahedron(0.0f, 200.0f, -400.0f, 30.0f, camera, window);
-	tetrahedron->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 5.0f);
+	tetrahedron->setAngularSpeed(glm::vec3(-0.3f, 0.2f, 0.4f), 72.0f);
 	tetrahedron->enableGravity();
 	tetrahedron->setShaderProgram(&blueShaderProgram);
 
+	// Creates a blue rotating sphere
 	Sphere *sphere = new Sphere(-100.0f, 150.0f, -400.0f, 15.0f, camera, window);
-	sphere->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 5.0f);
+	sphere->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 72.0f);
 	sphere->enableGravity();
 	sphere->setShaderProgram(&blueShaderProgram);
 
+	// Creates a brown plane
 	Plane *plane = new Plane(0.0f, -0.1f, 0.0f, 5000.0f, camera, window);
 	plane->setShaderProgram(&brownShaderProgram);
 
@@ -198,6 +201,7 @@ GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int he
 	screenWidth = width;
 	screenHeight = height;
 
+	// Sets initial value for keys vector
 	glfwInit();
 	for (int i = 0; i < 1024; i++)
 		keys[i] = false;
@@ -268,6 +272,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+	// Updates variables with mouse position
 	yPos = ypos;
 	xPos = xpos;
 }

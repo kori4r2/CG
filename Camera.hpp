@@ -11,7 +11,7 @@ private:
 	// Yaw and pitch value are used to store the current rotation value of the camera
 	GLfloat _yaw, _pitch;
 	// _speedValue stores the speed for camera movement on xz plane, _lastTime is use for updates, _gravityValue stores
-	// absolute value of gravity force, _eyeHeight stores the value for the camera position related to it's position
+	// absolute value of gravity force, _eyeHeight stores the value for the camera elevation related to it's position
 	float _speedValue, _lastTime, _gravityValue, _eyeHeight;
 	// _width and _height are window size parameters
 	int _width, _height;
