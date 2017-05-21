@@ -32,10 +32,10 @@ public:
 	// but not altered
 	const glm::mat4 &view, &projection, &view2D, &projection2D;
 	// The basic constructor only needs a reference to the keys vector and the window
-	Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mousey);
+	Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mousey, double *yScroll);
 	// The other constructors can set the camera position as well
-	Camera(glm::vec3 position, bool *keysVector, GLFWwindow *window, double *mousex, double *mousey);
-	Camera(float x, float y, float z, bool *keysVector, GLFWwindow *window, double *mousex, double *mousey);
+	Camera(glm::vec3 position, bool *keysVector, GLFWwindow *window, double *mousex, double *mousey, double *yScroll);
+	Camera(float x, float y, float z, bool *keysVector, GLFWwindow *window, double *mousex, double *mousey, double *yScroll);
 	// Some setters
 	void enableGravity();
 	void disableGravity();

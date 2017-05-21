@@ -35,7 +35,7 @@ GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int he
 // Global variables
 GLuint screenWidth, screenHeight;
 bool movFlag = false, jumpFlag = false, keys[1024];
-double movX, movY, xPos, yPos;
+double movX, movY, xPos, yPos, yScroll;
 
 int main() {
 
@@ -50,7 +50,7 @@ int main() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Creates the camera
-	Camera *camera = new Camera(keys, window, &xPos, &yPos);
+	Camera *camera = new Camera(keys, window, &xPos, &yPos, &yScroll);
 	// Sets camera values
 	camera->setSpeedValue(70.0f);
 	camera->enableGravity();
@@ -279,5 +279,5 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 	// Call camera class function that updates the zoom
-	camera->ProcessMouseScroll(yoffset);
+	yScroll = yoffset;
 }

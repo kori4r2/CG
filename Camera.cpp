@@ -1,6 +1,6 @@
 #include "Camera.hpp"
 
-Camera::Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mousey)
+Camera::Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mousey, double *yScroll)
 	// sets the values of the const variables
 	: _upVector(glm::vec3(0.0f, 1.0f, 0.0f)), projection(_projection), view(_view), view2D(_view2D), projection2D(_projection2D){
 	// Gets variables ready
@@ -37,14 +37,14 @@ Camera::Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mou
 	_gravity = new glm::vec3(-1.0f *_upVector);
 }
 
-Camera::Camera(glm::vec3 position, bool *keysVector, GLFWwindow *window, double *mousex, double *mousey)
-	: Camera(keysVector, window, mousex, mousey){
+Camera::Camera(glm::vec3 position, bool *keysVector, GLFWwindow *window, double *mousex, double *mousey, double *yScroll)
+	: Camera(keysVector, window, mousex, mousey, yScroll){
 	// Does the basic constructor and sets camera position
 	*_cameraPosition = position;
 }
 
-Camera::Camera(float x, float y, float z, bool *keysVector, GLFWwindow *window, double *mousex, double *mousey)
-	: Camera(keysVector, window, mousex, mousey) {
+Camera::Camera(float x, float y, float z, bool *keysVector, GLFWwindow *window, double *mousex, double *mousey, double *yScroll)
+	: Camera(keysVector, window, mousex, mousey, yScroll) {
 	// Same as above, different method
 	_cameraPosition->x = x;
 	_cameraPosition->y = y;
@@ -180,6 +180,14 @@ void Camera::Update() {
 	if(!_keys[GLFW_KEY_LEFT_CONTROL] && !_keys[GLFW_KEY_RIGHT_CONTROL])
 		_cameraPosition->y += _eyeHeight;
 
+	// Updates FOV based on yScroll from the mouse
+	if (_fov >= 1.0f && _fov <= 45.0f)
+		_fov -= yScroll;
+	if (_fov <= 1.0f)
+		_fov = 1.0f;
+	if(_fov >= 45.0f)
+		_fov = 45.0f;
+
 	// Updates view matrix based on new camera position
 	_view = glm::lookAt(*_cameraPosition, (*_cameraPosition) + (*_cameraFront), *_cameraUp);
 	_projection = glm::perspective(_fov, (float)_width / (float)_height, 0.1f, 1000.0f);
@@ -187,14 +195,6 @@ void Camera::Update() {
 	// Undoes the _eyeHeight elevation if needed
 	if (!_keys[GLFW_KEY_LEFT_CONTROL] && !_keys[GLFW_KEY_RIGHT_CONTROL])
 		_cameraPosition->y -= _eyeHeight;
-}
-void ProcessMouseScroll(GLfloat yoffset) {
-	if (this->_fov >= 1.0f && this->_fov <= 45.0f)
-		this->_fov -= yoffset;
-	if (this->_fov <= 1.0f)
-		this->_fov = 1.0f;
-	if(this->_fov >= 45.0f)
-		this->_fov = 45.0f;
 }
 
 Camera::~Camera() {
