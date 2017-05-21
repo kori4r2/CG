@@ -14,7 +14,6 @@ Camera::Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mou
 	_pitch = 0.0f;
 	_fov = 45.0f;
 	_yScroll = yScroll;
-	_lastyScroll = *yScroll;
 
 	glfwGetFramebufferSize(window, &_width, &_height);
 

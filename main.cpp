@@ -127,6 +127,7 @@ int main() {
 	plane->setShaderProgram(&brownShaderProgram);
 
 //---------------------------------------------------------------------------------------------------------
+	bool jump = true;
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
 
@@ -142,27 +143,25 @@ int main() {
 		}
 		*/
 		
-		bool jump = 0;
 		// Checks spacebar press
 		if (jumpFlag) {
 			// Jumps with the camera
 			//camera->jump(100);
 			// Activates speed in the cube
-			if(jump == 0) {
+			if(jump) {
 				cube->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 72.0f);
 				cube->setSpeed(glm::vec3(0.0f, 1.0f, 0.0f), 400);
 
 				tetrahedron->setAngularSpeed(glm::vec3(-0.3f, 0.2f, 0.4f), 72.0f);
 
 				sphere->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 72.0f);
-				jump = 1;
-			}
-			else {	
+				jump = false;
+			} else {	
 				cube->setAngularSpeed(0.0f);
 				cube->setSpeed(0.0f);
 				tetrahedron->setAngularSpeed(0.0f);
 				sphere->setAngularSpeed(0.0f);
-				jump = 0;
+				jump = true;
 			}
 
 			jumpFlag = false;
