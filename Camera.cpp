@@ -183,7 +183,7 @@ void Camera::Update() {
 		_cameraPosition->y += _eyeHeight;
 
 	// Updates FOV based on yScroll from the mouse
-	if(*y_Scroll != _lastyScroll)
+	if(*_yScroll != _lastyScroll)
 		_fov -= *_yScroll;
 	if (_fov <= 1.0f)
 		_fov = 1.0f;
@@ -193,7 +193,7 @@ void Camera::Update() {
 
 	// Updates view matrix based on new camera position
 	_view = glm::lookAt(*_cameraPosition, (*_cameraPosition) + (*_cameraFront), *_cameraUp);
-	_projection = glm::perspective(_fov, (float)_width / (float)_height, 0.1f, 1000.0f);
+	_projection = glm::perspective(glm::radians(_fov), (float)_width / (float)_height, 0.1f, 1000.0f);
 
 	// Undoes the _eyeHeight elevation if needed
 	if (!_keys[GLFW_KEY_LEFT_CONTROL] && !_keys[GLFW_KEY_RIGHT_CONTROL])
