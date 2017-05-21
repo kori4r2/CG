@@ -30,6 +30,7 @@ int nada = _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 void key_callback(GLFWwindow*, int, int, int, int);
 void mouse_button_callback(GLFWwindow*, int, int, int);
 void mouse_callback(GLFWwindow*, double, double);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 // Creates a window using the desired parameters
 GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int height, const char *title);
 // Global variables
