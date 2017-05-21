@@ -183,13 +183,13 @@ void Camera::Update() {
 		_cameraPosition->y += _eyeHeight;
 
 	// Updates FOV based on yScroll from the mouse
-	if(*_yScroll != _lastyScroll)
-		_fov -= *_yScroll;
+	
+	_fov -= *_yScroll;
 	if (_fov <= 1.0f)
 		_fov = 1.0f;
 	if(_fov >= 45.0f)
 		_fov = 45.0f;
-	_lastyScroll = *_yScroll;
+	*_yScroll = 0.0f;
 
 	// Updates view matrix based on new camera position
 	_view = glm::lookAt(*_cameraPosition, (*_cameraPosition) + (*_cameraFront), *_cameraUp);
