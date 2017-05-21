@@ -13,6 +13,7 @@ Camera::Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mou
 	_yaw = 0.0f;
 	_pitch = 0.0f;
 	_fov = 45.0f;
+	_yScroll = yScroll;
 
 	glfwGetFramebufferSize(window, &_width, &_height);
 
@@ -181,8 +182,7 @@ void Camera::Update() {
 		_cameraPosition->y += _eyeHeight;
 
 	// Updates FOV based on yScroll from the mouse
-	if (_fov >= 1.0f && _fov <= 45.0f)
-		_fov -= yScroll;
+	_fov -= *yScroll;
 	if (_fov <= 1.0f)
 		_fov = 1.0f;
 	if(_fov >= 45.0f)
