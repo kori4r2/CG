@@ -7,7 +7,7 @@
 class Camera {
 private:
 	// Reference to the variables containing mouse position and variable to store the position from last update
-	double *_mouseX, *_mouseY, _lastMouseX, _lastMouseY, *_yScroll, _lastyScroll;
+	double *_mouseX, *_mouseY, _lastMouseX, _lastMouseY, *_yScroll;
 	// Yaw and pitch value are used to store the current rotation value of the camera
 	GLfloat _yaw, _pitch, _fov;
 	// _speedValue stores the speed for camera movement on xz plane, _lastTime is use for updates, _gravityValue stores

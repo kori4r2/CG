@@ -102,6 +102,10 @@ void Polyhedron::setAngle(float value) {
 	_angle = value;
 }
 
+void Polyhedron::setRadius(float value) {
+	_radius = value;
+}
+
 void Polyhedron::setAngularSpeed(glm::vec3 axis, float value) {
 	// The axis vector is normalized before being stored
 	*_rotationAxis = glm::normalize(axis);

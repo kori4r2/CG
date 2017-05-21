@@ -52,6 +52,7 @@ public:
 	void setSpeed(glm::vec3 direction, float value);
 	void setSpeed(float value);
 	void setAngle(float value);
+	void setRadius(float value);
 	void setAngularSpeed(glm::vec3 axis, float value);
 	void setAngularSpeed(float value);
 	void setShaderProgram(GLuint *shaderProgram);

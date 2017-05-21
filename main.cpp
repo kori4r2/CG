@@ -54,7 +54,7 @@ int main() {
 	Camera *camera = new Camera(keys, window, &xPos, &yPos, &yScroll);
 	// Sets camera values
 	camera->setSpeedValue(70.0f);
-	camera->enableGravity();
+	//camera->enableGravity();
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -108,21 +108,17 @@ int main() {
 
 	// Creates a blue rotating cube
 	Cube *cube = new Cube(100.0f, 30.0f, -400.0f, 30.0f, camera, window);
-	cube->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 72.0f);
-	// Throws it up and activates gravity
-	cube->setSpeed(glm::vec3(0.0f, 1.0f, 0.0f), 400);
+	// Activates gravity
 	cube->enableGravity();
 	cube->setShaderProgram(&blueShaderProgram);
 
 	// Creates a blue rotating tetrahedron
 	Tetrahedron *tetrahedron = new Tetrahedron(0.0f, 200.0f, -400.0f, 30.0f, camera, window);
-	tetrahedron->setAngularSpeed(glm::vec3(-0.3f, 0.2f, 0.4f), 72.0f);
 	tetrahedron->enableGravity();
 	tetrahedron->setShaderProgram(&blueShaderProgram);
 
 	// Creates a blue rotating sphere
 	Sphere *sphere = new Sphere(-100.0f, 150.0f, -400.0f, 15.0f, camera, window);
-	sphere->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 72.0f);
 	sphere->enableGravity();
 	sphere->setShaderProgram(&blueShaderProgram);
 
@@ -145,11 +141,30 @@ int main() {
 			movFlag = false;
 		}
 		*/
-
+		
+		bool jump = 0;
 		// Checks spacebar press
 		if (jumpFlag) {
 			// Jumps with the camera
-			camera->jump(100);
+			//camera->jump(100);
+			// Activates speed in the cube
+			if(jump == 0) {
+				cube->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 72.0f);
+				cube->setSpeed(glm::vec3(0.0f, 1.0f, 0.0f), 400);
+
+				tetrahedron->setAngularSpeed(glm::vec3(-0.3f, 0.2f, 0.4f), 72.0f);
+
+				sphere->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 72.0f);
+				jump = 1;
+			}
+			else {	
+				cube->setAngularSpeed(0.0f);
+				cube->setSpeed(0.0f);
+				tetrahedron->setAngularSpeed(0.0f);
+				sphere->setAngularSpeed(0.0f);
+				jump = 0;
+			}
+
 			jumpFlag = false;
 		}
 
