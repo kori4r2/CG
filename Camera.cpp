@@ -182,7 +182,7 @@ void Camera::Update() {
 		_cameraPosition->y += _eyeHeight;
 
 	// Updates FOV based on yScroll from the mouse
-	_fov -= *yScroll;
+	_fov -= *_yScroll;
 	if (_fov <= 1.0f)
 		_fov = 1.0f;
 	if(_fov >= 45.0f)
