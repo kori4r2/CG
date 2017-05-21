@@ -36,7 +36,7 @@ GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int he
 // Global variables
 GLuint screenWidth, screenHeight;
 bool movFlag = false, jumpFlag = false, keys[1024];
-double movX, movY, xPos, yPos, yScroll;
+double movX, movY, xPos, yPos, yScroll = 0.0f;
 
 int main() {
 
