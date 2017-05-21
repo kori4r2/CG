@@ -9,7 +9,7 @@ private:
 	// Reference to the variables containing mouse position and variable to store the position from last update
 	double *_mouseX, *_mouseY, _lastMouseX, _lastMouseY;
 	// Yaw and pitch value are used to store the current rotation value of the camera
-	GLfloat _yaw, _pitch;
+	GLfloat _yaw, _pitch, _fov;
 	// _speedValue stores the speed for camera movement on xz plane, _lastTime is use for updates, _gravityValue stores
 	// absolute value of gravity force, _eyeHeight stores the value for the camera elevation related to it's position
 	float _speedValue, _lastTime, _gravityValue, _eyeHeight;

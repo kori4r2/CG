@@ -12,6 +12,7 @@ Camera::Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mou
 	_lastMouseY = *mousey;
 	_yaw = 0.0f;
 	_pitch = 0.0f;
+	_fov = 45.0f;
 
 	glfwGetFramebufferSize(window, &_width, &_height);
 
@@ -181,11 +182,21 @@ void Camera::Update() {
 
 	// Updates view matrix based on new camera position
 	_view = glm::lookAt(*_cameraPosition, (*_cameraPosition) + (*_cameraFront), *_cameraUp);
+	_projection = glm::perspective(_fov, (float)_width / (float)_height, 0.1f, 1000.0f);
 
 	// Undoes the _eyeHeight elevation if needed
 	if (!_keys[GLFW_KEY_LEFT_CONTROL] && !_keys[GLFW_KEY_RIGHT_CONTROL])
 		_cameraPosition->y -= _eyeHeight;
 }
+void ProcessMouseScroll(GLfloat yoffset) {
+	if (this->_fov >= 1.0f && this->_fov <= 45.0f)
+		this->_fov -= yoffset;
+	if (this->_fov <= 1.0f)
+		this->_fov = 1.0f;
+	if(this->_fov >= 45.0f)
+		this->_fov = 45.0f;
+}
+
 Camera::~Camera() {
 	// Frees allocated memory
 	delete(_cameraPosition);

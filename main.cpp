@@ -276,3 +276,8 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
 	yPos = ypos;
 	xPos = xpos;
 }
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+	// Call camera class function that updates the zoom
+	camera->ProcessMouseScroll(yoffset);
+}
