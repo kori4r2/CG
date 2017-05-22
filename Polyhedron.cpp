@@ -94,8 +94,11 @@ void Polyhedron::setSpeed(glm::vec3 direction, float value) {
 }
 
 void Polyhedron::setSpeed(float value) {
+	// This function doesn't work if the object is not moving
+	if (_speedValue != 0)
+		*_speed = glm::normalize(*_speed);
 	_speedValue = value;
-	*_speed = glm::normalize(*_speed) * _speedValue;
+	*_speed = *_speed * _speedValue;
 }
 
 void Polyhedron::setAngle(float value) {

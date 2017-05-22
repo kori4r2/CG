@@ -152,13 +152,13 @@ void Camera::Update() {
 	_cameraSpeed->x = _cameraSpeed->z = 0;
 
 	// If any shift key is being pressed, increases speed
-	_speedValue *= (_keys[GLFW_KEY_LEFT_SHIFT] || _keys[GLFW_KEY_RIGHT_SHIFT]) ? 1.75f : 1.0f;
+	_speedValue *= (_keys[GLFW_KEY_LEFT_SHIFT] || _keys[GLFW_KEY_RIGHT_SHIFT]) ? 2.5f : 1.0f;
 
 	// Applies the new desired speed
 	*_cameraSpeed += _speedValue * speedDirection;
 
 	// reverts _speedValue back to it's original value
-	_speedValue /= (_keys[GLFW_KEY_LEFT_SHIFT] || _keys[GLFW_KEY_RIGHT_SHIFT]) ? 1.75f : 1.0f;
+	_speedValue /= (_keys[GLFW_KEY_LEFT_SHIFT] || _keys[GLFW_KEY_RIGHT_SHIFT]) ? 2.5f : 1.0f;
 
 	// gets current time to calculate deltaTime between updates
 	float currentTime = (float)glfwGetTime();
@@ -182,7 +182,6 @@ void Camera::Update() {
 		_cameraPosition->y += _eyeHeight;
 
 	// Updates FOV based on yScroll from the mouse
-	
 	_fov -= *_yScroll;
 	if (_fov <= 1.0f)
 		_fov = 1.0f;

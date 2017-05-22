@@ -54,7 +54,7 @@ int main() {
 	Camera *camera = new Camera(keys, window, &xPos, &yPos, &yScroll);
 	// Sets camera values
 	camera->setSpeedValue(70.0f);
-	//camera->enableGravity();
+	//camera->enableGravity(); // Allows the camera to jump
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -65,8 +65,8 @@ int main() {
 	if (!success)
 		return -1;
 
-	// Create and compile blue fragment shader from code
-	GLuint blueFShader = CreateSingleColorFShader(0.1f, 0.1f, 0.9f, 1.0f, &success);
+	// Create and compile semi transparent blue fragment shader from code
+	GLuint blueFShader = CreateSingleColorFShader(0.1f, 0.1f, 0.5f, 1.0f, &success);
 	if (!success)
 		return -1;
 
@@ -102,22 +102,22 @@ int main() {
 	glDeleteShader(redFShader);
 	glDeleteShader(brownFShader);
 
-	// Creates a red square
-	Polygon *square = new Polygon((screenWidth / 2), (screenHeight / 2), 25, 4, camera, window);
+	// Creates a red semi transparent square to be positioned in the middle of the screen
+	Polygon *square = new Polygon((screenWidth / 2), (screenHeight / 2), 20, 4, camera, window);
 	square->setShaderProgram(&redShaderProgram);
 
-	// Creates a blue rotating cube
+	// Creates a blue cube
 	Cube *cube = new Cube(100.0f, 30.0f, -400.0f, 30.0f, camera, window);
 	// Activates gravity
 	cube->enableGravity();
 	cube->setShaderProgram(&blueShaderProgram);
 
-	// Creates a blue rotating tetrahedron
+	// Creates a blue tetrahedron
 	Tetrahedron *tetrahedron = new Tetrahedron(0.0f, 200.0f, -400.0f, 30.0f, camera, window);
 	tetrahedron->enableGravity();
 	tetrahedron->setShaderProgram(&blueShaderProgram);
 
-	// Creates a blue rotating sphere
+	// Creates a blue sphere
 	Sphere *sphere = new Sphere(-100.0f, 150.0f, -400.0f, 15.0f, camera, window);
 	sphere->enableGravity();
 	sphere->setShaderProgram(&blueShaderProgram);
@@ -147,23 +147,31 @@ int main() {
 		if (jumpFlag) {
 			// Jumps with the camera
 			//camera->jump(100);
-			// Activates speed in the cube
+			// Activates speed in the polyhedrons
 			if(jump) {
-				cube->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 72.0f);
-				cube->setSpeed(glm::vec3(0.0f, 1.0f, 0.0f), 400);
-
-				tetrahedron->setAngularSpeed(glm::vec3(-0.3f, 0.2f, 0.4f), 72.0f);
-
-				sphere->setAngularSpeed(glm::vec3(0.3f, 0.1f, -0.1f), 72.0f);
+				// The rotation axis of the polyhedrons is completely random (-1.0 ~ 1.0, -1.0 ~ 1.0, -1.0 ~ 1.0)
+				cube->setAngularSpeed(glm::vec3(((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f), 90.0f);
+				// Each polyhedron gets throw up in the y axis, but in a random direction on the xz plane (the speed direction is (-0.5 ~ 0.5, 1.0, -0.5 ~ 0.5))
+				cube->setSpeed(glm::vec3(((std::rand() % 101) * 0.01f) -0.5f, 1.0f, ((std::rand() % 101) * 0.01f) - 0.5f), 200.0f);
+				// The speed and angular speed of the tetrahedron and the sphere are set just like the cube's
+				tetrahedron->setAngularSpeed(glm::vec3(((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f), 90.0f);
+				tetrahedron->setSpeed(glm::vec3(((std::rand() % 101) * 0.01f) - 0.5f, 1.0f, ((std::rand() % 101) * 0.01f) - 0.5f), 200.0f);
+				sphere->setAngularSpeed(glm::vec3(((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f), 90.0f);
+				sphere->setSpeed(glm::vec3(((std::rand() % 101) * 0.01f) - 0.5f, 1.0f, ((std::rand() % 101) * 0.01f) - 0.5f), 200.0f);
+				// Changes the bool variable, to make the next spacebar press stop the objects, instead of throw them
 				jump = false;
 			} else {	
+				// Stops all object movements
 				cube->setAngularSpeed(0.0f);
 				cube->setSpeed(0.0f);
 				tetrahedron->setAngularSpeed(0.0f);
+				tetrahedron->setSpeed(0.0f);
 				sphere->setAngularSpeed(0.0f);
+				sphere->setSpeed(0.0f);
+				// Change the bool variable, to make the the next spacebar press throw the objects, instead of stop them
 				jump = true;
 			}
-
+			// Resets the jumpFlag to indicate that the spacebar press has been processed
 			jumpFlag = false;
 		}
 
