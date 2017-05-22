@@ -25,9 +25,12 @@ Plane::Plane(float x, float y, float z, float radius, Camera *camera, GLFWwindow
 	_vertices = new GLfloat[3 * 4];
 	for (int i = 0; i < 3 * 4; i++)
 		_vertices[i] = aux[i];
-	_indices = new GLuint[4];
-	for (int i = 0; i < 4; i++)
-		_indices[i] = i;
+	_indices = new GLuint[6];
+	for (int i = 0; i < 2; i++) {
+		_indices[(3 * i) + 0] = 0;
+		_indices[(3 * i) + 1] = i + 1;
+		_indices[(3 * i) + 2] = i + 2;
+	}
 
 	// Set EBO, VAO and VBO for drawing
 	glGenBuffers(1, &_EBO);
@@ -39,7 +42,7 @@ Plane::Plane(float x, float y, float z, float radius, Camera *camera, GLFWwindow
 	glBufferData(GL_ARRAY_BUFFER, 3 * 4/*number of vertices*/ * sizeof(GLfloat), _vertices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), _indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(GLuint), _indices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
@@ -149,7 +152,7 @@ void Plane::Draw() {
 
 	// Draws the object
 	glBindVertexArray(_VAO);
-	glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, _indices);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, _indices);
 	glBindVertexArray(0);
 }
 
