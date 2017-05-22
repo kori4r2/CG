@@ -3,7 +3,7 @@
 void Sphere::generateVertices() {
 
 	_vertices = new GLfloat[3 * (_rings * _sectors)];
-	_indices = new GLuint[(_rings - 1) * _sectors * 4];
+	_indices = new GLuint[3 * (_nSidesFaces - 2) * _nFaces];
 
 	for(int r = 0; r < _rings; r++){
 		for (int s = 0; s < _sectors; s++) {
@@ -24,11 +24,15 @@ void Sphere::generateVertices() {
 	// Use a loop that goes through the vertices in the same order to fill the indices using (r, s), (r, s+1), (r+1, s+1) and (r+1, s+1) vertices for each square
 	for (int r = 0; r < (_rings - 1); r++) {
 		for (int s = 0; s < _sectors; s++) {
-			_indices[(r * (4 *_sectors)) + (s * 4) + 0] = (r * _sectors) + s;
+			// Gets indices to draw 2 triangles to form the current square
+			_indices[(r * (6 *_sectors)) + (s * 6) + 0] = (r * _sectors) + s;
 			// The module is used to get the first sector when the end is reached
-			_indices[(r * (4 * _sectors)) + (s * 4) + 1] = (r * _sectors) + ((s + 1) % _sectors);
-			_indices[(r * (4 * _sectors)) + (s * 4) + 2] = ((r + 1) * _sectors) + ((s + 1) % _sectors);
-			_indices[(r * (4 * _sectors)) + (s * 4) + 3] = ((r + 1) * _sectors) + s;
+			_indices[(r * (6 * _sectors)) + (s * 6) + 1] = (r * _sectors) + ((s + 1) % _sectors);
+			_indices[(r * (6 * _sectors)) + (s * 6) + 2] = ((r + 1) * _sectors) + ((s + 1) % _sectors);
+			// Second triangle
+			_indices[(r * (6 * _sectors)) + (s * 6) + 3] = (r * _sectors) + s;
+			_indices[(r * (6 * _sectors)) + (s * 6) + 4] = ((r + 1) * _sectors) + s;
+			_indices[(r * (6 * _sectors)) + (s * 6) + 5] = ((r + 1) * _sectors) + ((s + 1) % _sectors);
 		}
 	}
 }
@@ -37,11 +41,11 @@ Sphere::Sphere(float x, float y, float z, float radius, Camera *camera, GLFWwind
 	// Calls base class constructor
 	: Polyhedron(x, y, z, radius, camera, window){
 	// Sets variables that weren't set by base constructor
-	_nFaces = 1;
-	_nSidesFaces = 0;
 	// Determines how segmented the sphere will be, higher values have smoother but heavier to load spheres
 	_sectors = 15;
 	_rings = 15;
+	_nFaces = _sectors * (_rings-1);
+	_nSidesFaces = 4;
 	// Generates vertices
 	generateVertices();
 	// Set EBO, VAO and VBO for drawing
@@ -61,39 +65,6 @@ Sphere::Sphere(float x, float y, float z, float radius, Camera *camera, GLFWwind
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void Sphere::Draw() {
-	// Sets shader program to be used
-	glUseProgram(*_shaderProgram);
-
-	// model transform changes from local space to world space, view changes from world to view space
-	// and projection changes from view space to clip space. glTransform contains the resulting transform matrix
-	glm::mat4 model;
-	glm::mat4 view;
-	glm::mat4 projection;
-	glm::mat4 gltransform;
-	// the translation moves the sphere to it's location in world space
-	model = glm::translate(model, glm::vec3(_x, _y, _z));
-	// the rotation applies the current angle rotation
-	model = glm::rotate(model, glm::radians(_angle), *_rotationAxis);
-	// the scale applies the sphere radius
-	model = glm::scale(model, glm::vec3(_radius, _radius, _radius));
-	// Gets the view matrix from the camera
-	view = _camera->view;
-	// Gets the projection matrix from the camera
-	projection = _camera->projection;
-	// Passes the resulting transform matrix to the vertex shader
-	gltransform = projection * view * model;
-
-	// Applies transform to shader program
-	GLuint transformLoc = glGetUniformLocation(*_shaderProgram, "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(gltransform));
-
-	// Draws the object
-	glBindVertexArray(_VAO);
-	glDrawElements(GL_QUADS, 4 * _sectors * (_rings - 1), GL_UNSIGNED_INT, _indices);
 	glBindVertexArray(0);
 }
 

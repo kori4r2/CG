@@ -8,8 +8,6 @@ private:
 public:
 	// Basic constructor and destructor
 	Cube(float x, float y, float z, float radius, Camera *camera, GLFWwindow *window);
-	// Needs its own draw function to draw using quads
-	void Draw();
 	// Destructor
 	~Cube();
 };

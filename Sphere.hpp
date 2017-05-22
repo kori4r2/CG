@@ -16,8 +16,6 @@ private:
 public:
 	// Basic constructor
 	Sphere(float x, float y, float z, float radius, Camera *camera, GLFWwindow *window);
-	// Draw function override to draw using quads
-	void Draw();
 	// Destructor
 	~Sphere();
 };

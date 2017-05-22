@@ -16,7 +16,7 @@ const GLfloat Polyhedron::cubeIndices[] = {
 	1, 5, 7, 3,
 	3, 2, 0, 1,
 	7, 6, 4, 5,
-	0, 4, 5, 1,
+	4, 5, 7, 6,
 	2, 6, 4, 0
 };
 
