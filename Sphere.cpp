@@ -37,13 +37,42 @@ void Sphere::generateVertices() {
 	}
 }
 
+Sphere::Sphere(float x, float y, float z, float radius, Camera *camera, GLFWwindow *window, int nRings, int nSectors)
+// Calls base class constructor
+	: Polyhedron(x, y, z, radius, camera, window),
+	// Determines how segmented the sphere will be, higher values have smoother but heavier to load spheres
+	_sectors(nSectors), _rings(nRings) {
+	// Sets variables that weren't set by base constructor
+	_nFaces = _sectors * (_rings - 1);
+	_nSidesFaces = 4;
+	// Generates vertices
+	generateVertices();
+	// Set EBO, VAO and VBO for drawing
+	glGenBuffers(1, &_EBO);
+	glGenBuffers(1, &_VBO);
+	glGenVertexArrays(1, &_VAO);
+
+	glBindVertexArray(_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+	glBufferData(GL_ARRAY_BUFFER, 3 * (_rings * _sectors)/*number of vertices*/ * sizeof(GLfloat), _vertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * (_rings - 1) * _sectors * sizeof(GLuint), _indices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
 Sphere::Sphere(float x, float y, float z, float radius, Camera *camera, GLFWwindow *window)
 	// Calls base class constructor
-	: Polyhedron(x, y, z, radius, camera, window){
-	// Sets variables that weren't set by base constructor
+	: Polyhedron(x, y, z, radius, camera, window),
 	// Determines how segmented the sphere will be, higher values have smoother but heavier to load spheres
-	_sectors = 15;
-	_rings = 15;
+	_sectors(15), _rings(15){
+	// Sets variables that weren't set by base constructor
 	_nFaces = _sectors * (_rings-1);
 	_nSidesFaces = 4;
 	// Generates vertices

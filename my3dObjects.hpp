@@ -3,3 +3,4 @@
 #include "Tetrahedron.hpp"
 #include "Sphere.hpp"
 #include "Plane.hpp"
+#include "Octahedron.hpp"

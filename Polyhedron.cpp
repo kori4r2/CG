@@ -188,9 +188,11 @@ void Polyhedron::Draw() {
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(gltransform));
 
 	// Draws the object
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
 	glBindVertexArray(_VAO);
 	glDrawElements(GL_TRIANGLES, 3 * _nFaces * (_nSidesFaces - 2), GL_UNSIGNED_INT, _indices);
 	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 Polyhedron::~Polyhedron() {

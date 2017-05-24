@@ -124,9 +124,11 @@ void Polygon::Draw() {
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(gltransform));
 
 	// Draws the object
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
 	glBindVertexArray(_VAO);
 	glDrawElements(GL_TRIANGLES, (_sides - 2) * 3, GL_UNSIGNED_INT, _indices);
 	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 Polygon::~Polygon() {
