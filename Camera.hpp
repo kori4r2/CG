@@ -31,6 +31,8 @@ public:
 	// These four values are references to the transformation matrices, allowing them to be accessed from outside the class,
 	// but not altered
 	const glm::mat4 &view, &projection, &view2D, &projection2D;
+	// This is a reference value to the camera front vector, needed for light calculations
+	glm::vec3* const& cameraFront;
 	// The basic constructor only needs a reference to the keys vector and the window
 	Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mousey, double *yScroll);
 	// The other constructors can set the camera position as well

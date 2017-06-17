@@ -182,7 +182,7 @@ void Polyhedron::Draw() {
 	projection = _camera->projection;
 
 	// Uses the shader, passing the necessary information
-	_shader.Use(_material, glm::vec3(_x, _y, _z), projection, view, model);
+	_shader.Use(_material, glm::vec3(_x, _y, _z), (*_camera->cameraFront), projection, view, model);
 
 	// Draws the object
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);

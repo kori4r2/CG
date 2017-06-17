@@ -97,7 +97,7 @@ int main() {
 	square->setShaderProgram(&redShaderProgram);
 
 	// Creates a blue cube
-	Cube *cube = new Cube(100.0f, 30.0f, -400.0f, 30.0f, camera, window);
+	Cube *cube = new Cube(100.0f, 100.0f, -400.0f, 30.0f, camera, window);
 	// Activates gravity
 	cube->enableGravity();
 	cube->setMaterial(blueMaterial);

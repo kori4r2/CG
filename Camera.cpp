@@ -2,7 +2,8 @@
 
 Camera::Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mousey, double *yScroll)
 	// sets the values of the const variables
-	: _upVector(glm::vec3(0.0f, 1.0f, 0.0f)), projection(_projection), view(_view), view2D(_view2D), projection2D(_projection2D){
+	: _upVector(glm::vec3(0.0f, 1.0f, 0.0f)), projection(_projection), view(_view),
+	view2D(_view2D), projection2D(_projection2D), cameraFront(_cameraFront){
 	// Gets variables ready
 	_eyeHeight = 20.0f;
 	_firstMouse = true;
