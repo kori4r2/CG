@@ -85,10 +85,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="light_materials.vs">
+    <None Include="light_materials_phong.fs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="light_materials.fs">
+    <None Include="light_materials_phong.vs">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

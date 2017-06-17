@@ -10,7 +10,7 @@
 #include "Camera.hpp"
 #include <iostream>
 
-/*
+
 // Debugging
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -24,7 +24,6 @@ int nada = _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #else
 #define DBG_NEW new
 #endif
-*/
 
 // Callback functions
 void key_callback(GLFWwindow*, int, int, int, int);
@@ -65,10 +64,7 @@ int main() {
 	if (!success)
 		return -1;
 
-	// Create and compile semi transparent blue fragment shader from code
-	GLuint blueFShader = CreateSingleColorFShader(0.1f, 0.1f, 0.5f, 1.0f, &success);
-	if (!success)
-		return -1;
+	Material blueMaterial(glm::vec3(0.1f, 0.1f, 0.5f));
 
 	// Create and compile semi transparent red fragment shader from code
 	GLuint redFShader = CreateSingleColorFShader(0.9f, 0.1f, 0.1f, 0.5f, &success);
@@ -77,11 +73,6 @@ int main() {
 
 	// Create and compiler brown fragment shader from code
 	GLuint brownFShader = CreateSingleColorFShader(0.3f, 0.1f, 0.05f, 1.0f, &success);
-	if (!success)
-		return -1;
-
-	// Creates shader program for blue color, attaches shaders and links the program
-	GLuint blueShaderProgram = LinkShaderProgram(vertexShader, blueFShader, &success);
 	if (!success)
 		return -1;
 
@@ -98,29 +89,28 @@ int main() {
 
 	// The shaders are no longer needed
 	glDeleteShader(vertexShader);
-	glDeleteShader(blueFShader);
 	glDeleteShader(redFShader);
 	glDeleteShader(brownFShader);
 
 	// Creates a red semi transparent square to be positioned in the middle of the screen
-	Polygon *square = new Polygon((screenWidth / 2), (screenHeight / 2), 20, 4, camera, window);
+	Polygon *square = new Polygon((screenWidth / 2.0f), (screenHeight / 2.0f), 20, 4, camera, window);
 	square->setShaderProgram(&redShaderProgram);
 
 	// Creates a blue cube
 	Cube *cube = new Cube(100.0f, 30.0f, -400.0f, 30.0f, camera, window);
 	// Activates gravity
 	cube->enableGravity();
-	cube->setShaderProgram(&blueShaderProgram);
+	cube->setMaterial(blueMaterial);
 
 	// Creates a blue tetrahedron
 	Tetrahedron *tetrahedron = new Tetrahedron(0.0f, 200.0f, -400.0f, 30.0f, camera, window);
 	tetrahedron->enableGravity();
-	tetrahedron->setShaderProgram(&blueShaderProgram);
+	tetrahedron->setMaterial(blueMaterial);
 
 	// Creates a blue sphere
 	Sphere *sphere = new Sphere(-100.0f, 150.0f, -400.0f, 15.0f, camera, window);
 	sphere->enableGravity();
-	sphere->setShaderProgram(&blueShaderProgram);
+	sphere->setMaterial(blueMaterial);
 
 	// Creates a brown plane
 	Plane *plane = new Plane(0.0f, -0.1f, 0.0f, 5000.0f, camera, window);

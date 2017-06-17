@@ -143,8 +143,8 @@
     <ClInclude Include="Tetrahedron.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="light_materials.fs" />
-    <None Include="light_materials.vs" />
+    <None Include="light_materials_phong.fs" />
+    <None Include="light_materials_phong.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

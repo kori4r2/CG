@@ -8,12 +8,12 @@ void Sphere::generateVertices() {
 	for(int r = 0; r < _rings; r++){
 		for (int s = 0; s < _sectors; s++) {
 			// Determines height (goes from -1 to 1)
-			float y = sin( ((-0.5f) * PI) + (PI * (r / (float)(_rings - 1))) );
+			GLfloat y = (GLfloat)sin( ((-0.5f) * PI) + (PI * (r / (float)(_rings - 1))) );
 			// sin( PI * (r/(_rings-1)) ) determines the radius of the xz plane circle at the current height
 			// Uses cos and sin( 2*PI * (s * (_sectors-1)) ) to go through the xz plane circle counterclockwise,
 			// generating evenly spaced vertices, one for each sector
-			float x = cos( (2 * PI * (s / (float)(_sectors)) ) ) * sin( PI * (r / (float)(_rings - 1)) );
-			float z = sin( (2 * PI * (s / (float)(_sectors)) ) ) * sin( PI * (r / (float)(_rings - 1)) );
+			GLfloat x = (GLfloat)cos( (2 * PI * (s / (float)(_sectors)) ) ) * sin( PI * (r / (float)(_rings - 1)) );
+			GLfloat z = (GLfloat)sin( (2 * PI * (s / (float)(_sectors)) ) ) * sin( PI * (r / (float)(_rings - 1)) );
 			// Saves the vertix coordinates
 			_vertices[(r * (3 *_sectors)) + (3 * s) + 0] = x;
 			_vertices[(r * (3 *_sectors)) + (3 * s) + 1] = y;

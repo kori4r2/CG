@@ -1,12 +1,14 @@
 #pragma once
 #include <math.h>
 #include <iostream>
+#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.hpp"
+#include "Shader.hpp"
 
 class Polyhedron {
 private:
@@ -15,7 +17,8 @@ private:
 
 protected:
 	// These static variables are here to help when implementing the generateVertices functions of some polyhedrons
-	static const GLfloat cubeVertices[], cubeIndices[], tetrahedronVertices[], tetrahedronIndices[];
+	static const GLfloat cubeVertices[], tetrahedronVertices[];
+	static const GLuint cubeIndices[], tetrahedronIndices[];
 	// Determines wether the object should be affected by gravity
 	bool _hasGravity;
 	// _x, _y and _z are the world space coordinates, _radius is the object radius, _speedValue and _angularSpeedValue
@@ -32,10 +35,11 @@ protected:
 	GLfloat *_vertices;
 	GLuint *_indices;
 	GLuint _VAO, _VBO, _EBO;
-	// Reference to the shader program
-	GLuint *_shaderProgram;
 	// A reference to the camera object
 	Camera *_camera;
+	// This object's material and shader
+	Material _material;
+	Shader _shader;
 
 public:
 	// Pretty simple constructor
@@ -55,7 +59,7 @@ public:
 	void setRadius(float value);
 	void setAngularSpeed(glm::vec3 axis, float value);
 	void setAngularSpeed(float value);
-	void setShaderProgram(GLuint *shaderProgram);
+	void setMaterial(Material material);
 	// Update and draw
 	void Update();
 	void Draw();

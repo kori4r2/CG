@@ -11,7 +11,7 @@ const GLfloat Polyhedron::cubeVertices[] = {
 	0.577350f, 0.577350f, 0.577350f
 };
 
-const GLfloat Polyhedron::cubeIndices[] = {
+const GLuint Polyhedron::cubeIndices[] = {
 	0, 4, 5, 1,
 	1, 5, 7, 3,
 	3, 2, 0, 1,
@@ -27,12 +27,14 @@ const GLfloat Polyhedron::tetrahedronVertices[] = {
 	0.816497f, -0.333333f, -0.471405f
 };
 
-const GLfloat Polyhedron::tetrahedronIndices[] = {
+const GLuint Polyhedron::tetrahedronIndices[] = {
 	0, 1, 2, 3, 0, 1 // each 3 consecutive vertices in this line should draw a triangle
 };
 
 Polyhedron::Polyhedron(float x, float y, float z, float radius, Camera *camera, GLFWwindow *window){
 	// Gets variables ready
+	_shader = Shader();
+	_material = Material();
 	_camera = camera;
 	_hasGravity = false;
 	_x = x;
@@ -119,8 +121,8 @@ void Polyhedron::setAngularSpeed(float value) {
 	_angularSpeedValue = value;
 }
 
-void Polyhedron::setShaderProgram(GLuint *shaderProgram) {
-	_shaderProgram = shaderProgram;
+void Polyhedron::setMaterial(Material material) {
+	_material = material;
 }
 
 void Polyhedron::Update() {
@@ -161,8 +163,6 @@ void Polyhedron::Update() {
 }
 
 void Polyhedron::Draw() {
-	// Sets shader program to be used
-	glUseProgram(*_shaderProgram);
 
 	// model transform changes from local space to world space, view changes from world to view space
 	// and projection changes from view space to clip space. glTransform contains the resulting transform matrix
@@ -180,12 +180,9 @@ void Polyhedron::Draw() {
 	view = _camera->view;
 	// Gets the projection matrix from the camera
 	projection = _camera->projection;
-	// Passes the resulting transform matrix to the vertex shader
-	gltransform = projection * view * model;
 
-	// Applies transform to shader program
-	GLuint transformLoc = glGetUniformLocation(*_shaderProgram, "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(gltransform));
+	// Uses the shader, passing the necessary information
+	_shader.Use(_material, glm::vec3(_x, _y, _z), projection, view, model);
 
 	// Draws the object
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
