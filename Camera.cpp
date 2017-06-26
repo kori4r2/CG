@@ -6,6 +6,7 @@ Camera::Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mou
 	view2D(_view2D), projection2D(_projection2D), cameraFront(_cameraFront){
 	// Gets variables ready
 	_eyeHeight = 20.0f;
+	_crouching = false;
 	_firstMouse = true;
 	_mouseX = mousex;
 	_mouseY = mousey;
@@ -59,6 +60,13 @@ void Camera::enableGravity() {
 
 void Camera::disableGravity() {
 	_hasGravity = false;
+}
+
+glm::vec3 Camera::viewPosition() {
+	if (_crouching)
+		return *_cameraPosition;
+	else
+		return ((*_cameraPosition) - glm::vec3(0.0f, _eyeHeight, 0.0f));
 }
 
 void Camera::jump(float value) {
@@ -179,7 +187,8 @@ void Camera::Update() {
 	_lastTime = currentTime;
 
 	// Applies _eyeHeight elevation if a CONTROL key is not pressed
-	if(!_keys[GLFW_KEY_LEFT_CONTROL] && !_keys[GLFW_KEY_RIGHT_CONTROL])
+	_crouching = (_keys[GLFW_KEY_LEFT_CONTROL] || _keys[GLFW_KEY_RIGHT_CONTROL]);
+	if(!_crouching)
 		_cameraPosition->y += _eyeHeight;
 
 	// Updates FOV based on yScroll from the mouse
@@ -195,7 +204,7 @@ void Camera::Update() {
 	_projection = glm::perspective(glm::radians(_fov), (float)_width / (float)_height, 0.1f, 1000.0f);
 
 	// Undoes the _eyeHeight elevation if needed
-	if (!_keys[GLFW_KEY_LEFT_CONTROL] && !_keys[GLFW_KEY_RIGHT_CONTROL])
+	if (!_crouching)
 		_cameraPosition->y -= _eyeHeight;
 }
 

@@ -125,6 +125,19 @@ void Polyhedron::setMaterial(Material material) {
 	_material = material;
 }
 
+// Make this object a light source
+void Polyhedron::makeLightSource(glm::vec3 color, glm::vec3 direction) {
+	_shader.makeLightSource(color, direction);
+}
+// This one for point light
+void Polyhedron::makeLightSource(glm::vec3 color, float constant, float  linear, float  quadratic) {
+	_shader.makeLightSource(color, constant, linear, quadratic);
+}
+// This one for spotlight
+void Polyhedron::makeLightSource(glm::vec3 color, glm::vec3 direction, float constant, float  linear, float  quadratic, float cutOff, float outerCutOff) {
+	_shader.makeLightSource(color, direction, constant, linear, quadratic, cutOff, outerCutOff);
+}
+
 void Polyhedron::Update() {
 	// The aux vector is used to apply transformations more easily
 	glm::vec4 aux = glm::vec4(_x, _y, _z, 1.0f);
@@ -138,7 +151,7 @@ void Polyhedron::Update() {
 
 	glm::vec3 gravityEffect = (*_gravity) * _gravityValue * deltaTime;
 
-	// IF the object is affected by gravity, calculates the new speed
+	// If the object is affected by gravity, calculates the new speed
 	if (_hasGravity) {
 		(*_speed) += gravityEffect;
 		_speedValue = glm::length(*_speed);
@@ -182,7 +195,7 @@ void Polyhedron::Draw() {
 	projection = _camera->projection;
 
 	// Uses the shader, passing the necessary information
-	_shader.Use(_material, glm::vec3(_x, _y, _z), (*_camera->cameraFront), projection, view, model);
+	_shader.Use(_material, glm::vec3(_x, _y, _z), (_camera->viewPosition()), projection, view, model);
 
 	// Draws the object
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);

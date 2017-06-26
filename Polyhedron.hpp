@@ -60,6 +60,12 @@ public:
 	void setAngularSpeed(glm::vec3 axis, float value);
 	void setAngularSpeed(float value);
 	void setMaterial(Material material);
+	// Make this object a light source
+	void makeLightSource(glm::vec3 color, glm::vec3 direction);
+	// This one for point light
+	void makeLightSource(glm::vec3 color, float constant, float  linear, float  quadratic);
+	// This one for spotlight
+	void makeLightSource(glm::vec3 color, glm::vec3 direction, float constant, float  linear, float  quadratic, float cutOff, float outerCutOff);
 	// Update and draw
 	void Update();
 	void Draw();

@@ -33,12 +33,12 @@ enum Materials {
 	LIGHTBALL
 };
 
-enum LightType {
-	NONE,
-	DIRECTIONAL,
-	POINT,
-	SPOTLIGHT
-};
+const int NONE = 0;
+const int DIRECTIONAL = 1;
+const int POINT = 2;
+const int SPOTLIGHT = 3;
+typedef int LightType;
+
 
 // The class material has all needed information for calculating the effect of light on an object
 // It was not created on a separate file because the shaders won't work without materials defined
@@ -69,6 +69,11 @@ typedef struct my_lightsource {
 	glm::vec3 position;
 	glm::vec3 direction;
 	glm::vec3 colorRGB;
+	float cutOff;
+	float outerCutOff;
+	float constantParameter;
+	float linearParameter;
+	float quadraticParameter;
 	LightType type;
 }LightSource;
 
@@ -97,8 +102,13 @@ public:
 	// Basic constructor
 	Shader();
 	// Turns the object with the current shader into a lightsource with the desired settings
-	void makeLightSource(LightType lightType, glm::vec3 position, glm::vec3 color, glm::vec3 direction);
+	// This functions creates a directional light
+	void makeLightSource(glm::vec3 color, glm::vec3 direction);
+	// This one for point light
+	void makeLightSource(glm::vec3 color, float constant, float  linear, float  quadratic);
+	// This one for spotlight
+	void makeLightSource(glm::vec3 color, glm::vec3 direction, float constant, float  linear, float  quadratic, float cutOff, float outerCutOff);
 	// Uses the current shader, passing the necessary parameters to the GPU pipeline
-	void Use(Material material, glm::vec3 cameraFront, glm::vec3 position, glm::mat4 projection, glm::mat4 view, glm::mat4 model);
+	void Use(Material material, glm::vec3 viewPos, glm::vec3 position, glm::mat4 projection, glm::mat4 view, glm::mat4 model);
 	~Shader();
 };

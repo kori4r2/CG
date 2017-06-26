@@ -182,25 +182,63 @@ Shader::Shader() {
 	_lightIndex = -1;
 }
 
-void Shader::makeLightSource(LightType lightType, glm::vec3 position, glm::vec3 color, glm::vec3 direction) {
+void Shader::makeLightSource(glm::vec3 color, glm::vec3 direction) {
 	// Checks if other light sources can be added
 	if (_lightCount <= MAX_N_LIGHTS) {
 		// Marks shader as a light source, sets the parameters for a new light source as asked and updates the vector and counter
 		_type = LIGHT;
-		_lightIndex = _lightCount++;
+		_lightIndex = _lightCount;
+		_lightCount++;
 		LightSource thisLight;
 		thisLight.colorRGB = color;
-		thisLight.direction = direction;
-		thisLight.type = lightType;
-		thisLight.position = position;
+		thisLight.direction = glm::normalize(direction);
+		thisLight.type = DIRECTIONAL;
+		thisLight.position = glm::vec3(0.0f, 0.0f, 0.0f);
+		thisLight.constantParameter = 0.0f;
+		thisLight.linearParameter = 0.0f;
+		thisLight.quadraticParameter = 0.0f;
+		thisLight.cutOff = 0.0f;
+		thisLight.outerCutOff = 0.0f;
 		_lightSources.push_back(thisLight);
-	}else {
+		std::cout << "Successfully added light source at index " << _lightIndex << std::endl;
+	}
+	else {
+		// If the limit is reached, does nothing and lets the user know why
+		std::cout << "Maximum amount of light sources has already been reached" << std::endl;
+	}
+}
+void Shader::makeLightSource(glm::vec3 color, float constant, float  linear, float  quadratic) {
+	// Checks if other light sources can be added
+	if (_lightCount <= MAX_N_LIGHTS) {
+		// Marks shader as a light source, sets the parameters for a new light source as asked and updates the vector and counter
+		makeLightSource(color, glm::vec3(0.0f, -1.0f, 0.0f));
+		_lightSources[_lightIndex].constantParameter = constant;
+		_lightSources[_lightIndex].linearParameter = linear;
+		_lightSources[_lightIndex].quadraticParameter = quadratic;
+		_lightSources[_lightIndex].type = POINT;
+	}
+	else {
+		// If the limit is reached, does nothing and lets the user know why
+		std::cout << "Maximum amount of light sources has already been reached" << std::endl;
+	}
+}
+void Shader::makeLightSource(glm::vec3 color, glm::vec3 direction, float constant, float  linear, float  quadratic, float cutOff, float outerCutOff) {
+	// Checks if other light sources can be added
+	if (_lightCount <= MAX_N_LIGHTS) {
+		// Marks shader as a light source, sets the parameters for a new light source as asked and updates the vector and counter
+		makeLightSource(color, constant, linear, quadratic);
+		_lightSources[_lightIndex].direction = glm::normalize(direction);
+		_lightSources[_lightIndex].cutOff = cutOff;
+		_lightSources[_lightIndex].outerCutOff = outerCutOff;
+		_lightSources[_lightIndex].type = SPOTLIGHT;
+	}
+	else {
 		// If the limit is reached, does nothing and lets the user know why
 		std::cout << "Maximum amount of light sources has already been reached" << std::endl;
 	}
 }
 
-void Shader::Use(Material material, glm::vec3 cameraFront, glm::vec3 position, glm::mat4 projection, glm::mat4 view, glm::mat4 model) {
+void Shader::Use(Material material, glm::vec3 viewPos, glm::vec3 position, glm::mat4 projection, glm::mat4 view, glm::mat4 model) {
 	// Whenever a light is moved, it's position has to be updated
 	if (_type == LIGHT) {
 		_lightSources[_lightIndex].position = position;
@@ -212,6 +250,8 @@ void Shader::Use(Material material, glm::vec3 cameraFront, glm::vec3 position, g
 	// For phong shading, passes the necessary variables
 	// To do: might need a switch statement to pass different uniform variables on different shading programs (mainly because of flat shading)
 	GLuint transformLoc;
+
+	// Pass material information
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "material.colorRGB");
 	glUniform3f(transformLoc, material.colorRGB.x, material.colorRGB.y, material.colorRGB.z);
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "material.ambient");
@@ -225,6 +265,61 @@ void Shader::Use(Material material, glm::vec3 cameraFront, glm::vec3 position, g
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "material.transparency");
 	glUniform1f(transformLoc, material.transparency);
 
+	// Pass lights information
+	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "nLights");
+	glUniform1i(transformLoc, _lightCount);
+	for (int i = 0; i < _lightCount; i++) {
+		std::string number = std::to_string(i);
+		std::string aux;
+		aux = "lightSources[" + number + "].position";
+		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
+		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
+		glUniform3f(transformLoc, _lightSources[i].position.x, _lightSources[i].position.y, _lightSources[i].position.z);
+		aux = "lightSources[" + number + "].direction";
+		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
+		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
+		glUniform3f(transformLoc, _lightSources[i].direction.x, _lightSources[i].direction.y, _lightSources[i].direction.z);
+		aux = "lightSources[" + number + "].colorRGB";
+		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
+		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
+		glUniform3f(transformLoc, _lightSources[i].colorRGB.x, _lightSources[i].colorRGB.y, _lightSources[i].colorRGB.z);
+		aux = "lightSources[" + number + "].cutOff";
+		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
+		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
+		glUniform1f(transformLoc, _lightSources[i].cutOff);
+		aux = "lightSources[" + number + "].outerCutOff";
+		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
+		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
+		glUniform1f(transformLoc, _lightSources[i].outerCutOff);
+		aux = "lightSources[" + number + "].constantParameter";
+		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
+		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
+		glUniform1f(transformLoc, _lightSources[i].constantParameter);
+		aux = "lightSources[" + number + "].linearParameter";
+		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
+		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
+		glUniform1f(transformLoc, _lightSources[i].linearParameter);
+		aux = "lightSources[" + number + "].quadraticParameter";
+		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
+		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
+		glUniform1f(transformLoc, _lightSources[i].quadraticParameter);
+		aux = "lightSources[" + number + "].type";
+		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
+		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
+		glUniform1i(transformLoc, _lightSources[i].type);
+	}
+
+	// Pass other light parameters
+	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "viewPos");
+	glUniform3f(transformLoc, viewPos.x, viewPos.y, viewPos.z);
+	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "lightAmbient");
+	glUniform3f(transformLoc, 0.05f, 0.05f, 0.05f);
+	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "lightDiffuse");
+	glUniform3f(transformLoc, 0.4f, 0.4f, 0.4f);
+	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "lightSpecular");
+	glUniform3f(transformLoc, 0.5f, 0.5f, 0.5f);
+
+	// Pass transform matrices information
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "model");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "view");

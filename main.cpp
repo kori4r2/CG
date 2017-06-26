@@ -64,7 +64,8 @@ int main() {
 	if (!success)
 		return -1;
 
-	Material blueMaterial(glm::vec3(0.1f, 0.1f, 0.5f));
+	// Creates blue default material for polygons
+	Material blueMaterial(glm::vec3(0.2f, 0.2f, 0.8f));
 
 	// Create and compile semi transparent red fragment shader from code
 	GLuint redFShader = CreateSingleColorFShader(0.9f, 0.1f, 0.1f, 0.5f, &success);
@@ -101,6 +102,7 @@ int main() {
 	// Activates gravity
 	cube->enableGravity();
 	cube->setMaterial(blueMaterial);
+	cube->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
 
 	// Creates a blue tetrahedron
 	Tetrahedron *tetrahedron = new Tetrahedron(0.0f, 200.0f, -400.0f, 30.0f, camera, window);
