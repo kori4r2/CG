@@ -34,8 +34,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 GLFWwindow *initWindow(int OpenGLverMajor, int OpenGLverMinor, int width, int height, const char *title);
 // Global variables
 GLuint screenWidth, screenHeight;
-bool movFlag = false, jumpFlag = false, keys[1024];
-double movX, movY, xPos, yPos, yScroll = 0.0f;
+bool clickFlag = false, jumpFlag = false, keys[1024];
+double clickX, clickY, xPos, yPos, yScroll = 0.0f;
 
 int main() {
 
@@ -65,7 +65,7 @@ int main() {
 		return -1;
 
 	// Creates blue default material for polygons
-	Material blueMaterial(glm::vec3(0.2f, 0.2f, 0.8f));
+	Material blueMaterial(METAL, glm::vec3(0.2f, 0.2f, 0.8f));
 
 	// Create and compile semi transparent red fragment shader from code
 	GLuint redFShader = CreateSingleColorFShader(0.9f, 0.1f, 0.1f, 0.5f, &success);
@@ -103,16 +103,20 @@ int main() {
 	cube->enableGravity();
 	cube->setMaterial(blueMaterial);
 	cube->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	//cube->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.007f, 0.0002f);
+	//cube->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f, 0.007f, 0.0002f, 1.0f, 0.5f);
 
 	// Creates a blue tetrahedron
 	Tetrahedron *tetrahedron = new Tetrahedron(0.0f, 200.0f, -400.0f, 30.0f, camera, window);
 	tetrahedron->enableGravity();
 	tetrahedron->setMaterial(blueMaterial);
+	//tetrahedron->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.007f, 0.0002f);
 
 	// Creates a blue sphere
 	Sphere *sphere = new Sphere(-100.0f, 150.0f, -400.0f, 15.0f, camera, window);
 	sphere->enableGravity();
 	sphere->setMaterial(blueMaterial);
+	//sphere->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.007f, 0.0002f);
 
 	// Creates a brown plane
 	Plane *plane = new Plane(0.0f, -0.1f, 0.0f, 5000.0f, camera, window);
@@ -126,14 +130,12 @@ int main() {
 		// Checks if events were triggered
 		glfwPollEvents();
 
-		/*
 		//Checks mouseclick
-		if (movFlag) {
-			// Moves square to position clicked
-			square->setSpeed(glm::vec3((movX - square->x()), (movY - square->y()), 0.0f), 200.0f);
-			movFlag = false;
+		if (clickFlag) {
+			// Changes reflection model
+			Shader::reflectionModel = (Shader::reflectionModel == PHONG) ? GOURAUD : PHONG;
+			clickFlag = false;
 		}
-		*/
 		
 		// Checks spacebar press
 		if (jumpFlag) {
@@ -280,10 +282,10 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
 	// Saves the position clicked and sets a corresponding flag
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-		glfwGetCursorPos(window, &movX, &movY);
-		std::cout << "pressed" << movX << "\t" << movY << std::endl;
-		movY = screenHeight - movY;
-		movFlag = true;
+		glfwGetCursorPos(window, &clickX, &clickY);
+		std::cout << "pressed" << clickX << "\t" << clickY << std::endl;
+		clickY = screenHeight - clickY;
+		clickFlag = true;
 	}
 }
 

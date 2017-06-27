@@ -16,7 +16,7 @@ const GLuint Polyhedron::cubeIndices[] = {
 	1, 5, 7, 3,
 	3, 2, 0, 1,
 	7, 6, 4, 5,
-	4, 5, 7, 6,
+	2, 6, 7, 3,
 	2, 6, 4, 0
 };
 
@@ -173,6 +173,8 @@ void Polyhedron::Update() {
 	_x = aux.x;
 	_y = aux.y;
 	_z = aux.z;
+
+	_shader.Update(glm::vec3(_x, _y, _z));
 }
 
 void Polyhedron::Draw() {
@@ -195,7 +197,7 @@ void Polyhedron::Draw() {
 	projection = _camera->projection;
 
 	// Uses the shader, passing the necessary information
-	_shader.Use(_material, glm::vec3(_x, _y, _z), (_camera->viewPosition()), projection, view, model);
+	_shader.Use(_material, (_camera->viewPosition()), projection, view, model);
 
 	// Draws the object
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);

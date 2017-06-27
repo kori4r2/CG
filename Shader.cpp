@@ -25,30 +25,30 @@ Material::Material(Materials type, glm::vec3 color)
 	case(DEFAULT):
 		break;
 	case(METAL):
-		_ambient = _colorRGB * 0.25f;
-		_diffuse = _colorRGB * 0.4f;
-		_specular = _colorRGB * 0.774597f;
+		_ambient = glm::vec3(0.25f);
+		_diffuse = glm::vec3(0.4f);
+		_specular = glm::vec3(0.774597f);
 		_shininess = 128.0f * 0.6f;
 		_transparency = 1.0f;
 		break;	
 	case(PLASTIC):
-		_ambient = _colorRGB * 0.0f;
-		_diffuse = _colorRGB * 0.55f;
-		_specular = _colorRGB * 0.7f;
+		_ambient = glm::vec3(0.0f);
+		_diffuse = glm::vec3(0.55f);
+		_specular = glm::vec3(0.7f);
 		_shininess = 128.0f * 0.25f;
 		_transparency = 1.0f;
 		break;
 	case(GLASS):
-		_ambient = _colorRGB * 0.15f;
-		_diffuse = _colorRGB * 0.45f;
-		_specular = _colorRGB * 0.7f;
+		_ambient = glm::vec3(0.15f);
+		_diffuse = glm::vec3(0.45f);
+		_specular = glm::vec3(0.7f);
 		_shininess = 128.0f * 0.4f;
-		_transparency = 0.5f;
+		_transparency = 0.75f;
 		break;
 	case(LIGHTBALL):
-		_ambient = _colorRGB;
-		_diffuse = _colorRGB * 0.0f;
-		_specular = _colorRGB * 0.0f;
+		_ambient = glm::vec3(1.0f);
+		_diffuse = glm::vec3(0.0f);
+		_specular = glm::vec3(0.0f);
 		_shininess = 0.0f;
 		_transparency = 1.0f;
 		break;
@@ -164,11 +164,11 @@ Shader::Shader() {
 			system("pause");
 			exit(1);
 		}
-		//_shaderProgram[GOURAND] = linkProgram("light_materials_gourand.vs", "light_materials_gourand.fs", &success);
-		//if (!success){
-		//	system("pause");
-		//	exit(1);
-		//}
+		_shaderProgram[GOURAUD] = linkProgram("light_materials_gouraud.vs", "light_materials_gouraud.fs", &success);
+		if (!success){
+			system("pause");
+			exit(1);
+		}
 		//_shaderProgram[FLAT] = linkProgram("light_materials_flat.vs", "light_materials_flat.fs", &success);
 		//if (!success){
 		//	system("pause");
@@ -184,7 +184,7 @@ Shader::Shader() {
 
 void Shader::makeLightSource(glm::vec3 color, glm::vec3 direction) {
 	// Checks if other light sources can be added
-	if (_lightCount <= MAX_N_LIGHTS) {
+	if (_lightCount <= MAX_N_LIGHTS && _type != LIGHT) {
 		// Marks shader as a light source, sets the parameters for a new light source as asked and updates the vector and counter
 		_type = LIGHT;
 		_lightIndex = _lightCount;
@@ -202,7 +202,11 @@ void Shader::makeLightSource(glm::vec3 color, glm::vec3 direction) {
 		_lightSources.push_back(thisLight);
 		std::cout << "Successfully added light source at index " << _lightIndex << std::endl;
 	}
-	else {
+	else if (_type == LIGHT) {
+		// If the object is already a light source does nothing and lets the user know why
+		// To do: change light source settings instead of doing nothing
+		std::cout << "This object is already a light source" << _lightIndex << std::endl;
+	} else {
 		// If the limit is reached, does nothing and lets the user know why
 		std::cout << "Maximum amount of light sources has already been reached" << std::endl;
 	}
@@ -238,16 +242,13 @@ void Shader::makeLightSource(glm::vec3 color, glm::vec3 direction, float constan
 	}
 }
 
-void Shader::Use(Material material, glm::vec3 viewPos, glm::vec3 position, glm::mat4 projection, glm::mat4 view, glm::mat4 model) {
-	// Whenever a light is moved, it's position has to be updated
-	if (_type == LIGHT) {
-		_lightSources[_lightIndex].position = position;
-	}
+void Shader::Use(Material material, glm::vec3 viewPos, glm::mat4 projection, glm::mat4 view, glm::mat4 model) {
 
 	// Sets which shader program will be used
 	glUseProgram(_shaderProgram[reflectionModel]);
 
 	// For phong shading, passes the necessary variables
+	// To do: implement flat shading
 	// To do: might need a switch statement to pass different uniform variables on different shading programs (mainly because of flat shading)
 	GLuint transformLoc;
 
@@ -313,9 +314,9 @@ void Shader::Use(Material material, glm::vec3 viewPos, glm::vec3 position, glm::
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "viewPos");
 	glUniform3f(transformLoc, viewPos.x, viewPos.y, viewPos.z);
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "lightAmbient");
-	glUniform3f(transformLoc, 0.05f, 0.05f, 0.05f);
+	glUniform3f(transformLoc, 0.75f, 0.75f, 0.75f);
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "lightDiffuse");
-	glUniform3f(transformLoc, 0.4f, 0.4f, 0.4f);
+	glUniform3f(transformLoc, 0.75f, 0.75f, 0.75f);
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "lightSpecular");
 	glUniform3f(transformLoc, 0.5f, 0.5f, 0.5f);
 
@@ -326,6 +327,14 @@ void Shader::Use(Material material, glm::vec3 viewPos, glm::vec3 position, glm::
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(view));
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "projection");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(projection));
+}
+
+void Shader::Update(glm::vec3 position) {
+	// Whenever a light is moved, it's position has to be updated
+	if (_type == LIGHT) {
+		_lightSources[_lightIndex].position = position;
+		std::cout << "(" << position.x << ", " << position.y << ", " << position.z << ")" << std::endl;
+	}
 }
 
 Shader::~Shader(){

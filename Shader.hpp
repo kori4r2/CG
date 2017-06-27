@@ -16,7 +16,7 @@
 // Enums used to make the code more understandable
 enum ReflectionModel {
 	PHONG = 0,
-	GOURAND,
+	GOURAUD,
 	FLAT
 };
 
@@ -109,6 +109,7 @@ public:
 	// This one for spotlight
 	void makeLightSource(glm::vec3 color, glm::vec3 direction, float constant, float  linear, float  quadratic, float cutOff, float outerCutOff);
 	// Uses the current shader, passing the necessary parameters to the GPU pipeline
-	void Use(Material material, glm::vec3 viewPos, glm::vec3 position, glm::mat4 projection, glm::mat4 view, glm::mat4 model);
+	void Use(Material material, glm::vec3 viewPos,glm::mat4 projection, glm::mat4 view, glm::mat4 model);
+	void Update(glm::vec3 position);
 	~Shader();
 };

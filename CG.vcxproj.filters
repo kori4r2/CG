@@ -91,5 +91,11 @@
     <None Include="light_materials_phong.vs">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="light_materials_gouraud.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="light_materials_gouraud.vs">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -1,6 +1,5 @@
 #version 330 core
-
-out vec4 color;
+layout (location = 0) in vec3 position;
 
 const int NONE = 0;
 const int DIRECTIONAL = 1;
@@ -31,9 +30,11 @@ struct LightSource {
 // Maximum number of light sources allowed
 #define MAX_N_LIGHTS 8
 
-in vec3 fragPos;
-in vec3 normal;
+out vec4 vertexColor;
 
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 uniform Material material;
 uniform int nLights;
 uniform LightSource lightSources[MAX_N_LIGHTS];
@@ -46,25 +47,28 @@ vec3 dirLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, Mater
 vec3 pointLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, vec3 fragmentPos, Material material);
 vec3 spotlight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, vec3 fragmentPos, Material material);
 
-void main()
-{
-	vec3 fragNormal = normalize(normal);
-	vec3 viewDir = normalize(viewPos - fragPos);
+void main(){
+	vec3 normal = normalize(mat3(transpose(inverse(model))) * (vec3(position)));
+	vec3 worldPos = vec3(model * vec4(position, 1.0));
+	vec3 viewDir = normalize(viewPos - worldPos);
 	vec3 colorCalc = vec3(0.0, 0.0, 0.0);
 
+	gl_Position = projection * view * vec4(worldPos, 1.0);
+
+	
 	int i;
 	for(i = 0; i < nLights; i++){
 		if(lightSources[i].type == DIRECTIONAL){
-			colorCalc += dirLight(lightSources[i], fragNormal, viewDir, material);
+			colorCalc += dirLight(lightSources[i], normal, viewDir, material);
 		}else if(lightSources[i].type == POINT){
 			// Position is fine
-			colorCalc += pointLight(lightSources[i], fragNormal, viewDir, fragPos, material);
+			colorCalc += pointLight(lightSources[i], normal, viewDir, worldPos, material);
 		}else if(lightSources[i].type == SPOTLIGHT){
-			colorCalc += spotlight(lightSources[i], fragNormal, viewDir, fragPos, material);
+			colorCalc += spotlight(lightSources[i], normal, viewDir, worldPos, material);
 		}
 	}
 
-	color = vec4(colorCalc, material.transparency);
+	vertexColor = vec4(colorCalc, material.transparency);
 }
 
 vec3 dirLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, Material material){
