@@ -31,7 +31,7 @@ public:
 	// These four values are references to the transformation matrices, allowing them to be accessed from outside the class,
 	// but not altered
 	const glm::mat4 &view, &projection, &view2D, &projection2D;
-	// This is a reference value to the camera front vector, needed for light calculations(NOT REALLY)
+	// This is a reference value to the camera front vector (not really needed, but it's implemented)
 	glm::vec3* const& cameraFront;
 	// The basic constructor only needs a reference to the keys vector and the window
 	Camera(bool *keysVector, GLFWwindow *window, double *mousex, double *mousey, double *yScroll);
@@ -43,7 +43,6 @@ public:
 	void disableGravity();
 	// Getter of camera position taking eye level into account
 	glm::vec3 viewPosition();
-	// A getter for camera position, taking the control key press into consideration
 	// The jump function is basically a setter for the y axis speed of the camera
 	void jump(float value);
 	void setSpeedValue(float value);

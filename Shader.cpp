@@ -3,13 +3,14 @@
 // Basic constructor, creates a default material that alters absolutely nothing and has gray color
 Material::Material() 
 	: colorRGB(_colorRGB), ambient(_ambient), diffuse(_diffuse), specular(_specular),
-	shininess(_shininess), transparency(_transparency){
+	shininess(_shininess), transparency(_transparency), type(_type){
 	_ambient = glm::vec3(1.0f, 1.0f, 1.0f);
 	_diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
 	_specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	_shininess = 1.0f;
 	_transparency = 1.0f;
 	_colorRGB = glm::vec3(0.5f, 0.5f, 0.5f);
+	_type = DEFAULT;
 }
 
 // Calls base constructor and then changes color
@@ -18,7 +19,7 @@ Material::Material(glm::vec3 color)
 	_colorRGB = color;
 }
 
-// Calls color constructor and the determines the other variables base on type and color
+// Calls color constructor and the determines the other variables base on type
 Material::Material(Materials type, glm::vec3 color)
 	: Material(color){
 	switch (type) {
@@ -30,6 +31,7 @@ Material::Material(Materials type, glm::vec3 color)
 		_specular = glm::vec3(0.774597f);
 		_shininess = 128.0f * 0.6f;
 		_transparency = 1.0f;
+		_type = METAL;
 		break;	
 	case(PLASTIC):
 		_ambient = glm::vec3(0.0f);
@@ -37,6 +39,7 @@ Material::Material(Materials type, glm::vec3 color)
 		_specular = glm::vec3(0.7f);
 		_shininess = 128.0f * 0.25f;
 		_transparency = 1.0f;
+		_type = PLASTIC;
 		break;
 	case(GLASS):
 		_ambient = glm::vec3(0.15f);
@@ -44,18 +47,20 @@ Material::Material(Materials type, glm::vec3 color)
 		_specular = glm::vec3(0.7f);
 		_shininess = 128.0f * 0.4f;
 		_transparency = 0.75f;
+		_type = GLASS;
 		break;
 	case(LIGHTBALL):
 		_ambient = glm::vec3(1.0f);
-		_diffuse = glm::vec3(0.0f);
-		_specular = glm::vec3(0.0f);
+		_diffuse = glm::vec3(0.1f);
+		_specular = glm::vec3(0.1f);
 		_shininess = 0.0f;
 		_transparency = 1.0f;
+		_type = LIGHTBALL;
 		break;
 	}
 }
 
-// Copy assignmet was complaining
+// Compiler was complaining about copy assignment, so here it is
 Material& Material::operator=(const Material &original) {
 	_colorRGB = original.colorRGB;
 	_ambient = original.ambient;
@@ -63,6 +68,7 @@ Material& Material::operator=(const Material &original) {
 	_specular = original.specular;
 	_shininess = original.shininess;
 	_transparency = original.transparency;
+	_type = original.type;
 	return *this;
 }
 
@@ -159,21 +165,19 @@ Shader::Shader() {
 	if (!_programsCompiled) {
 		// If they havent, compiles all three of them, exiting on failure
 		GLint success = 1;
+
 		_shaderProgram[PHONG] = linkProgram("light_materials_phong.vs", "light_materials_phong.fs", &success);
-		if (!success) {
-			system("pause");
+		if (!success)
 			exit(1);
-		}
+
 		_shaderProgram[GOURAUD] = linkProgram("light_materials_gouraud.vs", "light_materials_gouraud.fs", &success);
-		if (!success){
-			system("pause");
+		if (!success)
 			exit(1);
-		}
+
 		//_shaderProgram[FLAT] = linkProgram("light_materials_flat.vs", "light_materials_flat.fs", &success);
-		//if (!success){
-		//	system("pause");
+		//if (!success)
 		//	exit(1);
-		//}
+
 		// Sets this to true, so it doesn't have to compile again
 		_programsCompiled = true;
 	}
@@ -182,7 +186,7 @@ Shader::Shader() {
 	_lightIndex = -1;
 }
 
-void Shader::makeLightSource(glm::vec3 color, glm::vec3 direction) {
+bool Shader::makeLightSource(glm::vec3 color, glm::vec3 direction) {
 	// Checks if other light sources can be added
 	if (_lightCount <= MAX_N_LIGHTS && _type != LIGHT) {
 		// Marks shader as a light source, sets the parameters for a new light source as asked and updates the vector and counter
@@ -201,8 +205,8 @@ void Shader::makeLightSource(glm::vec3 color, glm::vec3 direction) {
 		thisLight.outerCutOff = 0.0f;
 		_lightSources.push_back(thisLight);
 		std::cout << "Successfully added light source at index " << _lightIndex << std::endl;
-	}
-	else if (_type == LIGHT) {
+		return true;
+	} else if (_type == LIGHT) {
 		// If the object is already a light source does nothing and lets the user know why
 		// To do: change light source settings instead of doing nothing
 		std::cout << "This object is already a light source" << _lightIndex << std::endl;
@@ -210,46 +214,57 @@ void Shader::makeLightSource(glm::vec3 color, glm::vec3 direction) {
 		// If the limit is reached, does nothing and lets the user know why
 		std::cout << "Maximum amount of light sources has already been reached" << std::endl;
 	}
+	return false;
 }
-void Shader::makeLightSource(glm::vec3 color, float constant, float  linear, float  quadratic) {
+bool Shader::makeLightSource(glm::vec3 color, float constant, float  linear, float  quadratic) {
 	// Checks if other light sources can be added
 	if (_lightCount <= MAX_N_LIGHTS) {
-		// Marks shader as a light source, sets the parameters for a new light source as asked and updates the vector and counter
-		makeLightSource(color, glm::vec3(0.0f, -1.0f, 0.0f));
-		_lightSources[_lightIndex].constantParameter = constant;
-		_lightSources[_lightIndex].linearParameter = linear;
-		_lightSources[_lightIndex].quadraticParameter = quadratic;
-		_lightSources[_lightIndex].type = POINT;
-	}
-	else {
+		// Calls the function for directional light and then changes it to a point light with the desired parameters
+		if (makeLightSource(color, glm::vec3(0.0f, -1.0f, 0.0f))) {
+			_lightSources[_lightIndex].constantParameter = constant;
+			_lightSources[_lightIndex].linearParameter = linear;
+			_lightSources[_lightIndex].quadraticParameter = quadratic;
+			_lightSources[_lightIndex].type = POINT;
+			return true;
+		}
+	} else {
 		// If the limit is reached, does nothing and lets the user know why
 		std::cout << "Maximum amount of light sources has already been reached" << std::endl;
 	}
+	return false;
 }
-void Shader::makeLightSource(glm::vec3 color, glm::vec3 direction, float constant, float  linear, float  quadratic, float cutOff, float outerCutOff) {
+bool Shader::makeLightSource(glm::vec3 color, glm::vec3 direction, float constant, float  linear, float  quadratic, float cutOff, float outerCutOff) {
 	// Checks if other light sources can be added
 	if (_lightCount <= MAX_N_LIGHTS) {
-		// Marks shader as a light source, sets the parameters for a new light source as asked and updates the vector and counter
-		makeLightSource(color, constant, linear, quadratic);
-		_lightSources[_lightIndex].direction = glm::normalize(direction);
-		_lightSources[_lightIndex].cutOff = cutOff;
-		_lightSources[_lightIndex].outerCutOff = outerCutOff;
-		_lightSources[_lightIndex].type = SPOTLIGHT;
-	}
-	else {
+		// Calls the function for point light and changes to a spotlight with desired parameters
+		if (makeLightSource(color, constant, linear, quadratic)) {
+			_lightSources[_lightIndex].direction = glm::normalize(direction);
+			_lightSources[_lightIndex].cutOff = cutOff;
+			_lightSources[_lightIndex].outerCutOff = outerCutOff;
+			_lightSources[_lightIndex].type = SPOTLIGHT;
+			return true;
+		}
+	} else {
 		// If the limit is reached, does nothing and lets the user know why
 		std::cout << "Maximum amount of light sources has already been reached" << std::endl;
 	}
+	return false;
 }
 
 void Shader::Use(Material material, glm::vec3 viewPos, glm::mat4 projection, glm::mat4 view, glm::mat4 model) {
 
+	// Flat shading is not implemented, so to avoid any problems a failsafe is needed
+	if (reflectionModel == FLAT) {
+		reflectionModel = GOURAUD;
+		std::cout << "Flat shading is not implemented, defaulting to phong" << std::endl;
+	}
+
 	// Sets which shader program will be used
 	glUseProgram(_shaderProgram[reflectionModel]);
 
-	// For phong shading, passes the necessary variables
+	// For phong and gouraud shading, passes the necessary variables (they have the same name and type)
 	// To do: implement flat shading
-	// To do: might need a switch statement to pass different uniform variables on different shading programs (mainly because of flat shading)
+	// To do: might need an if statement to pass different uniform variables on different shading programs (mainly because of flat shading)
 	GLuint transformLoc;
 
 	// Pass material information
@@ -265,47 +280,42 @@ void Shader::Use(Material material, glm::vec3 viewPos, glm::mat4 projection, glm
 	glUniform1f(transformLoc, material.shininess);
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "material.transparency");
 	glUniform1f(transformLoc, material.transparency);
+	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "material.type");
+	glUniform1i(transformLoc, material.type);
 
 	// Pass lights information
+	// Pass number of existing lights
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "nLights");
 	glUniform1i(transformLoc, _lightCount);
+	// Then loops through all of them passing their parameters
 	for (int i = 0; i < _lightCount; i++) {
 		std::string number = std::to_string(i);
 		std::string aux;
 		aux = "lightSources[" + number + "].position";
-		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
 		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
 		glUniform3f(transformLoc, _lightSources[i].position.x, _lightSources[i].position.y, _lightSources[i].position.z);
 		aux = "lightSources[" + number + "].direction";
-		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
 		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
 		glUniform3f(transformLoc, _lightSources[i].direction.x, _lightSources[i].direction.y, _lightSources[i].direction.z);
 		aux = "lightSources[" + number + "].colorRGB";
-		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
 		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
 		glUniform3f(transformLoc, _lightSources[i].colorRGB.x, _lightSources[i].colorRGB.y, _lightSources[i].colorRGB.z);
 		aux = "lightSources[" + number + "].cutOff";
-		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
 		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
 		glUniform1f(transformLoc, _lightSources[i].cutOff);
 		aux = "lightSources[" + number + "].outerCutOff";
-		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
 		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
 		glUniform1f(transformLoc, _lightSources[i].outerCutOff);
 		aux = "lightSources[" + number + "].constantParameter";
-		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
 		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
 		glUniform1f(transformLoc, _lightSources[i].constantParameter);
 		aux = "lightSources[" + number + "].linearParameter";
-		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
 		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
 		glUniform1f(transformLoc, _lightSources[i].linearParameter);
 		aux = "lightSources[" + number + "].quadraticParameter";
-		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
 		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
 		glUniform1f(transformLoc, _lightSources[i].quadraticParameter);
 		aux = "lightSources[" + number + "].type";
-		//std::cout << "passing variable as: " << aux.c_str() << std::endl;
 		transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], aux.c_str());
 		glUniform1i(transformLoc, _lightSources[i].type);
 	}
@@ -333,7 +343,6 @@ void Shader::Update(glm::vec3 position) {
 	// Whenever a light is moved, it's position has to be updated
 	if (_type == LIGHT) {
 		_lightSources[_lightIndex].position = position;
-		std::cout << "(" << position.x << ", " << position.y << ", " << position.z << ")" << std::endl;
 	}
 }
 

@@ -2,6 +2,12 @@
 
 out vec4 color;
 
+const int DEFAULT = 0;
+const int METAL = 1;
+const int PLASTIC = 2;
+const int GLASS = 3;
+const int LIGHTBALL = 4;
+
 const int NONE = 0;
 const int DIRECTIONAL = 1;
 const int POINT = 2;
@@ -14,6 +20,7 @@ struct Material {
 	vec3 specular;
 	float shininess;
 	float transparency;
+	int type;
 };
 
 struct LightSource {
@@ -51,20 +58,24 @@ void main()
 	vec3 fragNormal = normalize(normal);
 	vec3 viewDir = normalize(viewPos - fragPos);
 	vec3 colorCalc = vec3(0.0, 0.0, 0.0);
-
+	
 	int i;
-	for(i = 0; i < nLights; i++){
-		if(lightSources[i].type == DIRECTIONAL){
-			colorCalc += dirLight(lightSources[i], fragNormal, viewDir, material);
-		}else if(lightSources[i].type == POINT){
-			// Position is fine
-			colorCalc += pointLight(lightSources[i], fragNormal, viewDir, fragPos, material);
-		}else if(lightSources[i].type == SPOTLIGHT){
-			colorCalc += spotlight(lightSources[i], fragNormal, viewDir, fragPos, material);
+	if(material.type != LIGHTBALL){
+		for(i = 0; i < nLights; i++){
+			if(lightSources[i].type == DIRECTIONAL){
+				colorCalc += dirLight(lightSources[i], fragNormal, viewDir, material);
+			}else if(lightSources[i].type == POINT){
+				// Position is fine
+				colorCalc += pointLight(lightSources[i], fragNormal, viewDir, fragPos, material);
+			}else if(lightSources[i].type == SPOTLIGHT){
+				colorCalc += spotlight(lightSources[i], fragNormal, viewDir, fragPos, material);
+			}
 		}
-	}
 
-	color = vec4(colorCalc, material.transparency);
+		color = vec4(colorCalc, material.transparency);
+	}else{
+		color = vec4(material.colorRGB, material.transparency);
+	}
 }
 
 vec3 dirLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, Material material){

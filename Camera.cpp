@@ -66,7 +66,7 @@ glm::vec3 Camera::viewPosition() {
 	if (_crouching)
 		return *_cameraPosition;
 	else
-		return ((*_cameraPosition) - glm::vec3(0.0f, _eyeHeight, 0.0f));
+		return ((*_cameraPosition) + glm::vec3(0.0f, _eyeHeight, 0.0f));
 }
 
 void Camera::jump(float value) {

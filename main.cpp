@@ -50,7 +50,7 @@ int main() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Creates the camera
-	Camera *camera = new Camera(keys, window, &xPos, &yPos, &yScroll);
+	Camera *camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), keys, window, &xPos, &yPos, &yScroll);
 	// Sets camera values
 	camera->setSpeedValue(70.0f);
 	//camera->enableGravity(); // Allows the camera to jump
@@ -67,13 +67,11 @@ int main() {
 	// Creates blue default material for polygons
 	Material blueMaterial(METAL, glm::vec3(0.2f, 0.2f, 0.8f));
 
+	// Creates brown default material for the ground (plane)
+	Material brownMaterial(DEFAULT, glm::vec3(0.3f, 0.1f, 0.005f));
+
 	// Create and compile semi transparent red fragment shader from code
 	GLuint redFShader = CreateSingleColorFShader(0.9f, 0.1f, 0.1f, 0.5f, &success);
-	if (!success)
-		return -1;
-
-	// Create and compiler brown fragment shader from code
-	GLuint brownFShader = CreateSingleColorFShader(0.3f, 0.1f, 0.05f, 1.0f, &success);
 	if (!success)
 		return -1;
 
@@ -82,19 +80,13 @@ int main() {
 	if (!success)
 		return -1;
 
-	// Creates shader program for brown color, attaches shaders and links the program
-	GLuint brownShaderProgram = LinkShaderProgram(vertexShader, brownFShader, &success);
-	if (!success)
-		return -1;
-
 
 	// The shaders are no longer needed
 	glDeleteShader(vertexShader);
 	glDeleteShader(redFShader);
-	glDeleteShader(brownFShader);
 
 	// Creates a red semi transparent square to be positioned in the middle of the screen
-	Polygon *square = new Polygon((screenWidth / 2.0f), (screenHeight / 2.0f), 20, 4, camera, window);
+	Polygon *square = new Polygon((screenWidth / 2.0f), (screenHeight / 2.0f), 20, 2, camera, window);
 	square->setShaderProgram(&redShaderProgram);
 
 	// Creates a blue cube
@@ -116,11 +108,11 @@ int main() {
 	Sphere *sphere = new Sphere(-100.0f, 150.0f, -400.0f, 15.0f, camera, window);
 	sphere->enableGravity();
 	sphere->setMaterial(blueMaterial);
-	//sphere->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.007f, 0.0002f);
+	sphere->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.007f, 0.0002f);
 
 	// Creates a brown plane
 	Plane *plane = new Plane(0.0f, -0.1f, 0.0f, 5000.0f, camera, window);
-	plane->setShaderProgram(&brownShaderProgram);
+	plane->setMaterial(brownMaterial);
 
 //---------------------------------------------------------------------------------------------------------
 	bool jump = true;

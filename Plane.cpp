@@ -2,10 +2,13 @@
 
 Plane::Plane(float x, float y, float z, float radius, Camera *camera, GLFWwindow *window) {
 	// Gets variables ready
+	_shader = Shader();
+	_material = Material();
 	_camera = camera;
 	_x = x;
 	_y = y;
 	_z = z;
+	_yOffset = 1.0f;
 	_radius = radius;
 	_gravityValue = 200.0f;
 	_speed = new glm::vec3(0.0f, 0.0f, 0.0f);
@@ -18,10 +21,10 @@ Plane::Plane(float x, float y, float z, float radius, Camera *camera, GLFWwindow
 
 	// Sets the vertices and indices arrays to draw a square on the xz plane
 	GLfloat aux[] = {
-		-0.577350f, 0.0f, -0.577350f,
-		-0.577350f, 0.0f, 0.577350f,
-		0.577350f, 0.0f, 0.577350f,
-		0.577350f, 0.0f, -0.577350f };
+		-0.577350f, _yOffset, -0.577350f,
+		-0.577350f, _yOffset, 0.577350f,
+		0.577350f, _yOffset, 0.577350f,
+		0.577350f, _yOffset, -0.577350f };
 	_vertices = new GLfloat[3 * 4];
 	for (int i = 0; i < 3 * 4; i++)
 		_vertices[i] = aux[i];
@@ -96,8 +99,8 @@ void Plane::setAngularSpeed(float value) {
 	_angularSpeedValue = value;
 }
 
-void Plane::setShaderProgram(GLuint *shaderProgram) {
-	_shaderProgram = shaderProgram;
+void Plane::setMaterial(Material material) {
+	_material = material;
 }
 
 void Plane::Update() {
@@ -121,34 +124,30 @@ void Plane::Update() {
 	_x = aux.x;
 	_y = aux.y;
 	_z = aux.z;
+	// Pass updated position to shader
+	_shader.Update(glm::vec3(_x, _y, _z));
 }
 
 void Plane::Draw() {
-	// Sets shader program to be used
-	glUseProgram(*_shaderProgram);
 
 	// model transform changes from local space to world space, view changes from world to view space
 	// and projection changes from view space to clip space. glTransform contains the resulting transform matrix
 	glm::mat4 model;
 	glm::mat4 view;
 	glm::mat4 projection;
-	glm::mat4 gltransform;
 	// the translation moves the Plane to it's location in world space
-	model = glm::translate(model, glm::vec3(_x, _y, _z));
+	model = glm::translate(model, glm::vec3(_x, _y-_yOffset, _z));
 	// the rotation applies the current angle rotation
 	model = glm::rotate(model, glm::radians(_angle), *_rotationAxis);
 	// the scale applies the Plane radius
-	model = glm::scale(model, glm::vec3(_radius, _radius, _radius));
+	model = glm::scale(model, glm::vec3(_radius, 0.0f, _radius));
 	// Gets the view matrix from the camera
 	view = _camera->view;
 	// Gets the projection matrix from the camera
 	projection = _camera->projection;
-	// Passes the resulting transform matrix to the vertex shader
-	gltransform = projection * view * model;
 
-	// Applies transform to shader program
-	GLuint transformLoc = glGetUniformLocation(*_shaderProgram, "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(gltransform));
+	// Uses the shader, passing the necessary information
+	_shader.Use(_material, (_camera->viewPosition()), projection, view, model);
 
 	// Draws the object
 	glBindVertexArray(_VAO);

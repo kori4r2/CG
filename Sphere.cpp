@@ -70,7 +70,7 @@ Sphere::Sphere(float x, float y, float z, float radius, Camera *camera, GLFWwind
 Sphere::Sphere(float x, float y, float z, float radius, Camera *camera, GLFWwindow *window)
 	// Calls base class constructor
 	: Polyhedron(x, y, z, radius, camera, window),
-	// Determines how segmented the sphere will be, higher values have smoother but heavier to load spheres
+	// Sets default values for number of rings and number of sectors
 	_sectors(15), _rings(15){
 	// Sets variables that weren't set by base constructor
 	_nFaces = _sectors * (_rings-1);

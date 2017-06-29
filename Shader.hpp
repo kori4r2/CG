@@ -25,13 +25,13 @@ enum ShaderType {
 	MATERIAL
 };
 
-enum Materials {
-	DEFAULT,
-	METAL,
-	PLASTIC,
-	GLASS,
-	LIGHTBALL
-};
+// These were originally another enum but to avoid problems with the shaders they have been changed to const int
+const int DEFAULT = 0;
+const int METAL = 1;
+const int PLASTIC = 2;
+const int GLASS = 3;
+const int LIGHTBALL = 4;
+typedef int Materials;
 
 const int NONE = 0;
 const int DIRECTIONAL = 1;
@@ -47,10 +47,12 @@ private:
 	// Variables to calculate the color of this object when affected by light
 	glm::vec3 _colorRGB, _ambient, _diffuse, _specular;
 	float _shininess, _transparency;
+	Materials _type;
 public:
 	// const references to the variables, so they can be accessed from outside, but not altered
 	const glm::vec3 &colorRGB, &ambient, &diffuse, &specular;
 	const float &shininess, &transparency;
+	const Materials &type;
 
 	// Basic constructor with default gray color
 	Material();
@@ -83,7 +85,7 @@ private:
 	static std::vector<LightSource> _lightSources;
 	// A counter of how many light sources currently exist
 	static int _lightCount;
-	// A vector o all shader programs availabe
+	// A vector to all shader programs availabe (FLAT SHADING IS NOT IMPLEMENTED)
 	static GLuint _shaderProgram[3];
 	// A boolean that determines if all the programs are already compiled
 	static bool _programsCompiled;
@@ -103,13 +105,14 @@ public:
 	Shader();
 	// Turns the object with the current shader into a lightsource with the desired settings
 	// This functions creates a directional light
-	void makeLightSource(glm::vec3 color, glm::vec3 direction);
+	bool makeLightSource(glm::vec3 color, glm::vec3 direction);
 	// This one for point light
-	void makeLightSource(glm::vec3 color, float constant, float  linear, float  quadratic);
+	bool makeLightSource(glm::vec3 color, float constant, float  linear, float  quadratic);
 	// This one for spotlight
-	void makeLightSource(glm::vec3 color, glm::vec3 direction, float constant, float  linear, float  quadratic, float cutOff, float outerCutOff);
+	bool makeLightSource(glm::vec3 color, glm::vec3 direction, float constant, float  linear, float  quadratic, float cutOff, float outerCutOff);
 	// Uses the current shader, passing the necessary parameters to the GPU pipeline
 	void Use(Material material, glm::vec3 viewPos,glm::mat4 projection, glm::mat4 view, glm::mat4 model);
+	// Updates position, essential for light source calculations
 	void Update(glm::vec3 position);
 	~Shader();
 };

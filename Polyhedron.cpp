@@ -21,10 +21,10 @@ const GLuint Polyhedron::cubeIndices[] = {
 };
 
 const GLfloat Polyhedron::tetrahedronVertices[] = {
-	0.0f, 1.0f, 0.0f,
-	0.0f, -0.333333f, 0.9428090f,
-	-0.816497f, -0.333333f, -0.471405f,
-	0.816497f, -0.333333f, -0.471405f
+	0.81649658f, 0.0f, -0.57735027f,
+	-0.81649658f, 0.0f, -0.57735027f,
+	0.0f, 0.81649658f, 0.57735027f,
+	0.0f, -0.81649658f, 0.57735027f
 };
 
 const GLuint Polyhedron::tetrahedronIndices[] = {
@@ -125,17 +125,20 @@ void Polyhedron::setMaterial(Material material) {
 	_material = material;
 }
 
-// Make this object a light source
 void Polyhedron::makeLightSource(glm::vec3 color, glm::vec3 direction) {
-	_shader.makeLightSource(color, direction);
+	// If the change to light source succeeds, changes the material to make the object the same color as the light
+	if(_shader.makeLightSource(color, direction))
+		_material = Material(LIGHTBALL, color);
 }
-// This one for point light
+
 void Polyhedron::makeLightSource(glm::vec3 color, float constant, float  linear, float  quadratic) {
-	_shader.makeLightSource(color, constant, linear, quadratic);
+	if(_shader.makeLightSource(color, constant, linear, quadratic))
+		_material = Material(LIGHTBALL, color);
 }
-// This one for spotlight
+
 void Polyhedron::makeLightSource(glm::vec3 color, glm::vec3 direction, float constant, float  linear, float  quadratic, float cutOff, float outerCutOff) {
-	_shader.makeLightSource(color, direction, constant, linear, quadratic, cutOff, outerCutOff);
+	if(_shader.makeLightSource(color, direction, constant, linear, quadratic, cutOff, outerCutOff))
+		_material = Material(LIGHTBALL, color);
 }
 
 void Polyhedron::Update() {
@@ -173,7 +176,7 @@ void Polyhedron::Update() {
 	_x = aux.x;
 	_y = aux.y;
 	_z = aux.z;
-
+	// Pass updated position to shader
 	_shader.Update(glm::vec3(_x, _y, _z));
 }
 
