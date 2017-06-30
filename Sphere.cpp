@@ -71,7 +71,8 @@ Sphere::Sphere(float x, float y, float z, float radius, Camera *camera, GLFWwind
 	// Calls base class constructor
 	: Polyhedron(x, y, z, radius, camera, window),
 	// Sets default values for number of rings and number of sectors
-	_sectors(15), _rings(15){
+	// This value has been made lower (used to be 15) to make it more obvious how bad gouraud is
+	_sectors(8), _rings(8){
 	// Sets variables that weren't set by base constructor
 	_nFaces = _sectors * (_rings-1);
 	_nSidesFaces = 4;

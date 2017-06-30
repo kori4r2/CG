@@ -52,7 +52,7 @@ int main() {
 	// Creates the camera
 	Camera *camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), keys, window, &xPos, &yPos, &yScroll);
 	// Sets camera values
-	camera->setSpeedValue(70.0f);
+	camera->setSpeedValue(100.0f);
 	//camera->enableGravity(); // Allows the camera to jump
 
 //-------------------------------------------------------------------------------------------------------
@@ -64,14 +64,22 @@ int main() {
 	if (!success)
 		return -1;
 
-	// Creates blue default material for polygons
-	Material blueMaterial(METAL, glm::vec3(0.2f, 0.2f, 0.8f));
+	// Creates white metal material for polyhedrons
+	Material metalMaterial(METAL, glm::vec3(1.0f, 1.0f, 1.0f));
+	// Creates white glass material for polyhedrons
+	Material glassMaterial(GLASS, glm::vec3(1.0f, 1.0f, 1.0f));
+	// Creates white plastic material for polyhedrons
+	Material plasticMaterial(PLASTIC, glm::vec3(1.0f, 1.0f, 1.0f));
 
 	// Creates brown default material for the ground (plane)
-	Material brownMaterial(DEFAULT, glm::vec3(0.3f, 0.1f, 0.005f));
+	Material brownMaterial(DEFAULT, glm::vec3(0.9f, 0.3f, 0.015f));
 
 	// Create and compile semi transparent red fragment shader from code
 	GLuint redFShader = CreateSingleColorFShader(0.9f, 0.1f, 0.1f, 0.5f, &success);
+	if (!success)
+		return -1;
+	// Create and compile semi transparent yellow fragment shader from code
+	GLuint yellowFShader = CreateSingleColorFShader(0.9f, 0.9f, 0.1f, 0.5f, &success);
 	if (!success)
 		return -1;
 
@@ -79,36 +87,59 @@ int main() {
 	GLuint redShaderProgram = LinkShaderProgram(vertexShader, redFShader, &success);
 	if (!success)
 		return -1;
+	// Creates shader program for green color, attaches shaders and links the program
+	GLuint yellowShaderProgram = LinkShaderProgram(vertexShader, yellowFShader, &success);
+	if (!success)
+		return -1;
 
 
 	// The shaders are no longer needed
 	glDeleteShader(vertexShader);
 	glDeleteShader(redFShader);
+	glDeleteShader(yellowFShader);
 
 	// Creates a red semi transparent square to be positioned in the middle of the screen
-	Polygon *square = new Polygon((screenWidth / 2.0f), (screenHeight / 2.0f), 20, 2, camera, window);
+	Polygon *square = new Polygon((screenWidth / 2.0f), (screenHeight / 2.0f), 15, 4, camera, window);
 	square->setShaderProgram(&redShaderProgram);
 
-	// Creates a blue cube
-	Cube *cube = new Cube(100.0f, 100.0f, -400.0f, 30.0f, camera, window);
-	// Activates gravity
-	cube->enableGravity();
-	cube->setMaterial(blueMaterial);
-	cube->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
-	//cube->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.007f, 0.0002f);
-	//cube->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f, 0.007f, 0.0002f, 1.0f, 0.5f);
+	Polyhedron *objects[20];
+	int nObjects = 0;
 
-	// Creates a blue tetrahedron
-	Tetrahedron *tetrahedron = new Tetrahedron(0.0f, 200.0f, -400.0f, 30.0f, camera, window);
-	tetrahedron->enableGravity();
-	tetrahedron->setMaterial(blueMaterial);
-	//tetrahedron->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.007f, 0.0002f);
+	// "Sun"
+	objects[nObjects++] = new Sphere(0.0f, 1000.0f, 0.0f, 100.0f, camera, window);
+	// 3 light sources
+	objects[nObjects++] = new Sphere(0.0f, 200.0f, -400.0f, 20.0f, camera, window);
+	objects[nObjects++] = new Sphere(282.843154416f, 200.0f, 89.898714f, 20.0f, camera, window);
+	objects[nObjects++] = new Sphere(-282.843154416f, 200.0f, 89.898714f, 20.0f, camera, window);
+	// Polihedrons that can be thrown
+	objects[nObjects++] = new Sphere(0.0f, 60.0f, -200.0f, 20.0f, camera, window);
+	objects[nObjects++] = new Cube(200.0f, 60.0f, -200.0f, 20.0f, camera, window);
+	objects[nObjects++] = new Octahedron(-200.0f, 60.0f, -200.0f, 20.0f, camera, window);
 
-	// Creates a blue sphere
-	Sphere *sphere = new Sphere(-100.0f, 150.0f, -400.0f, 15.0f, camera, window);
+	// Set light sources
+	// Sets a directional light
+	objects[0]->makeLightSource(glm::vec3(1.0f, 1.0f, 0.9f), glm::vec3(0.0f, -1.0f, 0.0f));
+	// Sets a point light
+	objects[1]->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0035f, 0.0001f);
+	// Sets a downward pointing green spotlight
+	objects[2]->makeLightSource(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 10.f, 0.0007f, 0.00002f, glm::cos(glm::radians(40.0f)), glm::cos(glm::radians(45.0f)));
+	// Sets a downward pointing purple spotlight
+	objects[3]->makeLightSource(glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f), 10.f, 0.0007f, 0.00002f, glm::cos(glm::radians(40.0f)), glm::cos(glm::radians(45.0f)));
+
+	// Sets references to movable objects to make code more understandable
+	Sphere *sphere = (Sphere*)objects[4];
+	Cube *cube = (Cube*)objects[5];
+	Octahedron *octahedron = (Octahedron*)objects[6];
+
+	// Activates gravity on objects
 	sphere->enableGravity();
-	sphere->setMaterial(blueMaterial);
-	sphere->makeLightSource(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.007f, 0.0002f);
+	cube->enableGravity();
+	octahedron->enableGravity();
+
+	// Sets materials to objects
+	octahedron->setMaterial(glassMaterial);
+	cube->setMaterial(metalMaterial);
+	sphere->setMaterial(plasticMaterial);
 
 	// Creates a brown plane
 	Plane *plane = new Plane(0.0f, -0.1f, 0.0f, 5000.0f, camera, window);
@@ -127,6 +158,7 @@ int main() {
 			// Changes reflection model
 			Shader::reflectionModel = (Shader::reflectionModel == PHONG) ? GOURAUD : PHONG;
 			clickFlag = false;
+			square->setShaderProgram((Shader::reflectionModel == PHONG)? &redShaderProgram: &yellowShaderProgram);
 		}
 		
 		// Checks spacebar press
@@ -139,9 +171,9 @@ int main() {
 				cube->setAngularSpeed(glm::vec3(((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f), 90.0f);
 				// Each polyhedron gets throw up in the y axis, but in a random direction on the xz plane (the speed direction is (-0.5 ~ 0.5, 1.0, -0.5 ~ 0.5))
 				cube->setSpeed(glm::vec3(((std::rand() % 101) * 0.01f) -0.5f, 1.0f, ((std::rand() % 101) * 0.01f) - 0.5f), 200.0f);
-				// The speed and angular speed of the tetrahedron and the sphere are set just like the cube's
-				tetrahedron->setAngularSpeed(glm::vec3(((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f), 90.0f);
-				tetrahedron->setSpeed(glm::vec3(((std::rand() % 101) * 0.01f) - 0.5f, 1.0f, ((std::rand() % 101) * 0.01f) - 0.5f), 200.0f);
+				// The speed and angular speed of the octahedron and the sphere are set just like the cube's
+				octahedron->setAngularSpeed(glm::vec3(((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f), 90.0f);
+				octahedron->setSpeed(glm::vec3(((std::rand() % 101) * 0.01f) - 0.5f, 1.0f, ((std::rand() % 101) * 0.01f) - 0.5f), 200.0f);
 				sphere->setAngularSpeed(glm::vec3(((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f, ((std::rand() % 201) * 0.01f) - 1.0f), 90.0f);
 				sphere->setSpeed(glm::vec3(((std::rand() % 101) * 0.01f) - 0.5f, 1.0f, ((std::rand() % 101) * 0.01f) - 0.5f), 200.0f);
 				// Changes the bool variable, to make the next spacebar press stop the objects, instead of throw them
@@ -150,8 +182,8 @@ int main() {
 				// Stops all object movements
 				cube->setAngularSpeed(0.0f);
 				cube->setSpeed(0.0f);
-				tetrahedron->setAngularSpeed(0.0f);
-				tetrahedron->setSpeed(0.0f);
+				octahedron->setAngularSpeed(0.0f);
+				octahedron->setSpeed(0.0f);
 				sphere->setAngularSpeed(0.0f);
 				sphere->setSpeed(0.0f);
 				// Change the bool variable, to make the the next spacebar press throw the objects, instead of stop them
@@ -164,7 +196,7 @@ int main() {
 		// Updates camera position
 		camera->Update();
 		// Set color to clear buffer
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.6f, 0.6f, 0.9f, 1.0f);
 		// Clear color buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -173,14 +205,10 @@ int main() {
 		plane->Update();
 		plane->Draw();
 
-		cube->Update();
-		cube->Draw();
-
-		tetrahedron->Update();
-		tetrahedron->Draw();
-
-		sphere->Update();
-		sphere->Draw();
+		for (int i = 0; i < nObjects; i++) {
+			objects[i]->Update();
+			objects[i]->Draw();
+		}
 
 		// GUI (2D objects) update/draw functions must be called after 3D objects
 		square->Update();
@@ -192,10 +220,9 @@ int main() {
 
 //-----------------------------------------------------------------------------------------------------
 	// Ends execution
+	for (int i = 0; i < nObjects; i++)
+		delete(objects[i]);
 	delete(plane);
-	delete(sphere);
-	delete(tetrahedron);
-	delete(cube);
 	delete(square);
 	delete(camera);
 	glfwTerminate();

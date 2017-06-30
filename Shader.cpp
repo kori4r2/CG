@@ -4,12 +4,12 @@
 Material::Material() 
 	: colorRGB(_colorRGB), ambient(_ambient), diffuse(_diffuse), specular(_specular),
 	shininess(_shininess), transparency(_transparency), type(_type){
-	_ambient = glm::vec3(1.0f, 1.0f, 1.0f);
-	_diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-	_specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	_ambient = glm::vec3(1.0f);
+	_diffuse = glm::vec3(1.0f);
+	_specular = glm::vec3(1.0f);
 	_shininess = 1.0f;
 	_transparency = 1.0f;
-	_colorRGB = glm::vec3(0.5f, 0.5f, 0.5f);
+	_colorRGB = glm::vec3(0.7f, 0.7f, 0.7f);
 	_type = DEFAULT;
 }
 
@@ -34,7 +34,7 @@ Material::Material(Materials type, glm::vec3 color)
 		_type = METAL;
 		break;	
 	case(PLASTIC):
-		_ambient = glm::vec3(0.0f);
+		_ambient = glm::vec3(0.05f);
 		_diffuse = glm::vec3(0.55f);
 		_specular = glm::vec3(0.7f);
 		_shininess = 128.0f * 0.25f;
@@ -324,11 +324,11 @@ void Shader::Use(Material material, glm::vec3 viewPos, glm::mat4 projection, glm
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "viewPos");
 	glUniform3f(transformLoc, viewPos.x, viewPos.y, viewPos.z);
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "lightAmbient");
-	glUniform3f(transformLoc, 0.75f, 0.75f, 0.75f);
+	glUniform3f(transformLoc, 0.2f, 0.2f, 0.2f);
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "lightDiffuse");
-	glUniform3f(transformLoc, 0.75f, 0.75f, 0.75f);
+	glUniform3f(transformLoc, 0.8f, 0.8f, 0.8f);
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "lightSpecular");
-	glUniform3f(transformLoc, 0.5f, 0.5f, 0.5f);
+	glUniform3f(transformLoc, 0.8f, 0.8f, 0.8f);
 
 	// Pass transform matrices information
 	transformLoc = glGetUniformLocation(_shaderProgram[reflectionModel], "model");

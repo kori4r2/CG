@@ -201,7 +201,7 @@ void Camera::Update() {
 
 	// Updates view matrix based on new camera position
 	_view = glm::lookAt(*_cameraPosition, (*_cameraPosition) + (*_cameraFront), *_cameraUp);
-	_projection = glm::perspective(glm::radians(_fov), (float)_width / (float)_height, 0.1f, 1000.0f);
+	_projection = glm::perspective(glm::radians(_fov), (float)_width / (float)_height, 0.1f, 5000.0f);
 
 	// Undoes the _eyeHeight elevation if needed
 	if (!_crouching)
