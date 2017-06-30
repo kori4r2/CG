@@ -1,5 +1,6 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
+
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -10,7 +11,7 @@
 #include "Camera.hpp"
 #include <iostream>
 
-
+/*
 // Debugging
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -24,6 +25,7 @@ int nada = _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #else
 #define DBG_NEW new
 #endif
+*/
 
 // Callback functions
 void key_callback(GLFWwindow*, int, int, int, int);
@@ -138,8 +140,8 @@ int main() {
 
 	// Sets materials to objects
 	octahedron->setMaterial(glassMaterial);
-	cube->setMaterial(metalMaterial);
-	sphere->setMaterial(plasticMaterial);
+	cube->setMaterial(plasticMaterial);
+	sphere->setMaterial(metalMaterial);
 
 	// Creates a brown plane
 	Plane *plane = new Plane(0.0f, -0.1f, 0.0f, 5000.0f, camera, window);

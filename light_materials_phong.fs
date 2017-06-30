@@ -45,30 +45,39 @@ uniform Material material;
 uniform int nLights;
 uniform LightSource lightSources[MAX_N_LIGHTS];
 uniform vec3 viewPos;
-uniform vec3 lightAmbient;
-uniform vec3 lightDiffuse;
-uniform vec3 lightSpecular;
 
-vec3 dirLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, Material material);
-vec3 pointLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, vec3 fragmentPos, Material material);
-vec3 spotlight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, vec3 fragmentPos, Material material);
+vec3 dirLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, Material material, vec3 lightAmbient, vec3 lightDiffuse, vec3 lightSpecular);
+vec3 pointLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, vec3 fragmentPos, Material material, vec3 lightAmbient, vec3 lightDiffuse, vec3 lightSpecular);
+vec3 spotlight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, vec3 fragmentPos, Material material, vec3 lightAmbient, vec3 lightDiffuse, vec3 lightSpecular);
+
 
 void main()
 {
 	vec3 fragNormal = normalize(normal);
 	vec3 viewDir = normalize(viewPos - fragPos);
 	vec3 colorCalc = vec3(0.0, 0.0, 0.0);
+	vec3 lightAmbient;
+	vec3 lightDiffuse;
+	vec3 lightSpecular;
 	
 	int i;
 	if(material.type != LIGHTBALL){
 		for(i = 0; i < nLights; i++){
 			if(lightSources[i].type == DIRECTIONAL){
-				colorCalc += dirLight(lightSources[i], fragNormal, viewDir, material);
+				lightAmbient = vec3(0.25, 0.25, 0.25);
+				lightDiffuse = vec3(0.7, 0.7, 0.7);
+				lightSpecular = vec3(0.5, 0.5, 0.5);
+				colorCalc += dirLight(lightSources[i], fragNormal, viewDir, material, lightAmbient, lightDiffuse, lightSpecular);
 			}else if(lightSources[i].type == POINT){
-				// Position is fine
-				colorCalc += pointLight(lightSources[i], fragNormal, viewDir, fragPos, material);
+				lightAmbient = vec3(0.1, 0.1, 0.1);
+				lightDiffuse = vec3(1.0, 1.0, 1.0);
+				lightSpecular = vec3(1.0, 1.0, 1.0);
+				colorCalc += pointLight(lightSources[i], fragNormal, viewDir, fragPos, material, lightAmbient, lightDiffuse, lightSpecular);
 			}else if(lightSources[i].type == SPOTLIGHT){
-				colorCalc += spotlight(lightSources[i], fragNormal, viewDir, fragPos, material);
+				lightAmbient = vec3(0.5, 0.5, 0.5);
+				lightDiffuse = vec3(0.8, 0.8, 0.8);
+				lightSpecular = vec3(0.8, 0.8, 0.8);
+				colorCalc += spotlight(lightSources[i], fragNormal, viewDir, fragPos, material, lightAmbient, lightDiffuse, lightSpecular);
 			}
 		}
 
@@ -78,7 +87,7 @@ void main()
 	}
 }
 
-vec3 dirLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, Material material){
+vec3 dirLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, Material material, vec3 lightAmbient, vec3 lightDiffuse, vec3 lightSpecular){
 	// Calculate needed direction vectors
 	vec3 lightDirection = normalize(-source.direction);
 	vec3 reflectionDir = reflect(-lightDirection, fragmentNormal);
@@ -92,7 +101,7 @@ vec3 dirLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, Mater
 	return (source.colorRGB * material.colorRGB * (ambient + diffuse + specular));
 }
 
-vec3 pointLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, vec3 fragmentPos, Material material){
+vec3 pointLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, vec3 fragmentPos, Material material, vec3 lightAmbient, vec3 lightDiffuse, vec3 lightSpecular){
 	// Calculate needed direction vectors
 	vec3 lightDirection = normalize(source.position - fragmentPos);
 	vec3 reflectionDir = reflect(-lightDirection, fragmentNormal);
@@ -106,7 +115,7 @@ vec3 pointLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, vec
 	float specAux = pow(max(dot(viewDirection, reflectionDir), 0.0), material.shininess);
 	vec3 specular = lightSpecular * (material.specular * specAux);
 	// Apply attenuation
-	// TO DO: attenuation value is currently too lowe
+	// TO DO: attenuation value is currently too low
 	ambient *= attenuation;
 	diffuse *= attenuation;
 	specular *= attenuation;
@@ -114,7 +123,7 @@ vec3 pointLight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, vec
 	return (source.colorRGB * material.colorRGB * (ambient + diffuse + specular));
 }
 
-vec3 spotlight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, vec3 fragmentPos, Material material){
+vec3 spotlight(LightSource source, vec3 fragmentNormal, vec3 viewDirection, vec3 fragmentPos, Material material, vec3 lightAmbient, vec3 lightDiffuse, vec3 lightSpecular){
 	// Calculate needed direction vectors
 	vec3 lightDirection = normalize(source.position - fragmentPos);
 	vec3 reflectionDir = reflect(-lightDirection, fragmentNormal);
